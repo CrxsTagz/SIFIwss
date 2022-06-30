@@ -3,10 +3,15 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1 class="title">
-  Welcome to SIFI WSS
-</h1>
-<h2 class="subtitle">
-  by Cristina and Maher
+<div style="display:inline-block;">
+  <p>
+    <h1 class="title">
+      Welcome to SIFI WSS
+    </h1>
+    <h2 class="subtitle">
+      by Cristina and Maher
+  </p>
+  </div>
 </h2>
+<img src="{{url_for('static', filename='sifi-icon.jpg')}}" style=" display: inline-block; vertical-align: right; height: 65px">
 {% endblock %}
