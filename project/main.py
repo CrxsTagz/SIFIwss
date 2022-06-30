@@ -2,13 +2,21 @@
 
 from flask import Blueprint, render_template
 from flask_login import login_required, current_user
+import os
+from flask import send_from_directory
 
 main = Blueprint('main', __name__)
+
+
 
 @main.route('/')
 def index():
     return render_template('index.html')
 
+@main.route('/sifi-icon.ico')
+def favicon():
+    return send_from_directory(os.path.join(main.root_path, 'static'),
+                               'sifi-icon.ico')
 @main.route('/profile')
 @login_required
 def profile():

@@ -237,7 +237,7 @@ app.layout = html.Div([
         interval=5*1000, 
         n_intervals=0
     ), dbc.Alert(id='tbl_out', className='dark-theme-control'),
-   html.Div([ html.Img(src=app.get_asset_url('sifi.png')), html.H3("A cup of Sifi running like a coffee!") ])
+   #html.Div([ html.Img(src=app.get_asset_url('sifi.png')), html.H3("A cup of Sifi running like a coffee!") ])
  
     
 
