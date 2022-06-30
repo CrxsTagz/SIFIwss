@@ -10,7 +10,7 @@ from click import command
 from dash import Dash, Input, Output, callback, dash_table
 from dash import Dash, dcc, html, callback_context, State
 from dash.dependencies import Input, Output
-import project.classes as classes
+import classes
 import mysql.connector
 from dash import Dash, dash_table
 import pandas as pd
