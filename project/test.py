@@ -139,7 +139,8 @@ queryRaw = pointer.fetchall()
 # Transform the query payload into a dataframe
 queryPayload = np.array(queryRaw)
 df = pd.DataFrame(queryPayload, columns=['idagents', 'ubicacion', 'ip', 'weburl', 'sshurl', 'agentname','connection'])
-#Define Up or DOW in DataTaFrame
+
+# Define Up or DOW in DataTaFrame
 def LatencyRating():
     df['connection'] = df['ip'].apply(
         lambda x:
@@ -257,9 +258,6 @@ app.layout = html.Div(
                         html.H4(        
                             dash_table.DataTable(
                                 id = 'dataTable1',
-                                #columns = [{'name': i, 'id': i} ],
-                                #columns=[{"name": i, "id": i, 'type': "text", 'presentation':'markdown'} for i in  read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "kali").columns ],
-                                #columns=[{"name": [["weburl"]], "id": "weburl", 'type': "", 'presentation':'markdown'}],
                                 style_cell={'textAlign': 'left'}
                             )            
                         ), 
@@ -267,9 +265,6 @@ app.layout = html.Div(
                         html.H4(   
                             dash_table.DataTable(
                                 id = 'dataTable2',
-                                #columns = [{'name': i, 'id': i} ],
-                                #columns=[{"name": i, "id": i, 'type': "text", 'presentation':'markdown'} for i in  read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "kali").columns ],
-                                #columns=[{"name": [["weburl"]], "id": "weburl", 'type': "", 'presentation':'markdown'}],
                                 style_cell={'textAlign': 'left'}
                             )
                         ),
@@ -277,9 +272,6 @@ app.layout = html.Div(
                         html.H4(
                             dash_table.DataTable(
                                 id = 'dataTable3',
-                                #columns = [{'name': i, 'id': i} ],
-                                #columns=[{"name": i, "id": i, 'type': "text", 'presentation':'markdown'} for i in  read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "kali").columns ],
-                                #columns=[{"name": [["weburl"]], "id": "weburl", 'type': "", 'presentation':'markdown'}],
                                 style_cell={'textAlign': 'left'}
                             )
                         )
@@ -358,46 +350,23 @@ def update_output( value):
         Input('pandas-dropdown-1', 'value')
     ]
 )
-def render_content(tab, callbackContext,DropDownDevvalue):
+def render_content_tab3(tab, callbackContext, DropDownDevvalue):
     # Instantiate the callback context, to find the button ID that triggered the callback
     callbackContext = callback_context
     # Get button ID
     button_id = callbackContext.triggered[0]['prop_id'].split('.')[0]
-
     if button_id == 'submitButton' and tab == 'tab-3':
-        #if check_ping("100.64.0.2") == True:
         toSSH("100.64.0.2", "kali", "wlan1mon")
-        #if check_ping("100.64.0.4") == True:
         toSSH("100.64.0.4", "sifi2224", "wlan0mon")
-        #if check_ping("100.64.0.77") == True:
-        #   toSSH("100.64.0.77", "kali", "wlan1mon")  
-        #   SSIDDataTable()
         dataTable1Value = read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "kali").to_dict('records')
         dataTable2Value = read_csv_sftp("100.64.0.4", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "sifi2224").to_dict('records')
         dataTable3Value = read_csv_sftp("100.64.0.77", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "kali").to_dict('records')
         return dataTable1Value, dataTable2Value, dataTable3Value
     elif tab == 'tab-3':
-        return html.Div(
-            [ 
-                html.H4("Here you can Discover SSID's with your SifiAgents"),
-                html.H4(        
-                    dash_table.DataTable( 
-                        #columns = [{'name': i, 'id': i} ],
-                        #columns=[{"name": i, "id": i, 'type': "text", 'presentation':'markdown'} for i in  read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "kali").columns ],
-                        #columns=[{"name": [["weburl"]], "id": "weburl", 'type': "", 'presentation':'markdown'}],
-                        data = read_csv_sftp("100.64.0.1", "ittadmin", "/home/ittadmin/Reports/basic.wifi.csv", "L1br0Sh@rkR1ng").to_dict('records'), style_cell={'textAlign': 'left'},
-                        style_header={
-                          'backgroundColor': 'rgb(30, 30, 30)',
-                            'color': 'white'
-                        },
-                        style_data={
-                            'backgroundColor': 'rgb(50, 50, 50)',
-                            'color': 'white'
-                        },            
-                    )
-                )    
-            ]
-        )
+        dataTable1Value = read_csv_sftp("100.64.0.1", "ittadmin", "/home/ittadmin/Reports/basic.wifi.csv", "L1br0Sh@rkR1ng").to_dict('records')
+        dataTable2Value = pd.DataFrame().to_dict('records')
+        dataTable3Value = pd.DataFrame().to_dict('records')
+        return dataTable1Value, dataTable2Value, dataTable3Value
 
 # Callback to update tab2 content
 @app.callback(
@@ -412,15 +381,13 @@ def render_content(tab, callbackContext,DropDownDevvalue):
         Input('pandas-dropdown-1', 'value')
     ]
 )
-def render_content(tab, callbackContext,DropDownDevvalue):
+def render_content_tab2(tab, callbackContext, DropDownDevvalue):
     # Instantiate the callback context, to find the button ID that triggered the callback
     callbackContext = callback_context
     # Get button ID
     button_id = callbackContext.triggered[0]['prop_id'].split('.')[0]
-
     if button_id == 'submitButton' and tab == 'tab-2':
         LatencyRating()
-    
     elif tab == 'tab-2':
         return html.Div(
             [
