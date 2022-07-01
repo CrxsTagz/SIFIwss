@@ -14,4 +14,17 @@
   </div>
 </h2>
 <img src="{{url_for('static', filename='sifi-icon.jpg')}}" style=" display: inline-block; vertical-align: right; height: 65px">
+
+<head>
+  <title>Test</title> 
+  <meta charset=utf-8> </head>
+  <body>
+      <h1>SIFI</h1>
+      <form action="/pdf/">
+          <input type="submit" value="PDF" />
+      </form>
+      
+      <button> <a href="/pdf/">PDF</a></button>
+
+  </body>
 {% endblock %}
