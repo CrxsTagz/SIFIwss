@@ -568,7 +568,7 @@ def showTabContainer(selectedTab):
         tab3Style['display'] = 'none'
         tab4Style['display'] = 'none'
         tab5Style['display'] = 'inline'
-    return tab1Style, tab2Style, tab3Style, tab4Style
+    return tab1Style, tab2Style, tab3Style, tab4Style, tab5Style
 
 if __name__ == '__main__':
     app.run_server(debug=True, host='0.0.0.0', port='5007', dev_tools_silence_routes_logging=False)
