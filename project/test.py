@@ -235,6 +235,30 @@ app.layout = html.Div(
             id='tabs-content-inline', 
             className='dark-theme-control',
             children = [
+                # Tab1 Content
+                html.Div(
+                    id = 'tab1ContentDiv',
+                    children = [
+                        html.H1('Welcome to Sifi WSS')
+                    ]
+                ),
+                # Tab2 Content
+                html.Div(
+                    id = 'tab2ContentDiv',
+                    children = [
+                        dash_table.DataTable(
+                            id = 'tab2DataTable1',
+                            style_header={
+                                'backgroundColor': 'rgb(30, 30, 30)',
+                                'color': 'white'
+                            },
+                            style_data={
+                                'backgroundColor': 'rgb(50, 50, 50)',
+                                'color': 'green'
+                            }
+                        )
+                    ]
+                ),
                 # Tab3 Content
                 html.Div(
                     id = 'tab3ContentDiv',
@@ -262,29 +286,13 @@ app.layout = html.Div(
                         )
                     ]
                 ),
-                # Tab1 Content
+                # Tab4 Content
                 html.Div(
-                    id = 'tab1ContentDiv',
-                    children = [
-                        html.H1('Welcome to Sifi WSS')
-                    ]
+                    id = 'tab4ContentDiv'
                 ),
-                # Tab2 Content
+                # Tab5 Content
                 html.Div(
-                    id = 'tab2ContentDiv',
-                    children = [
-                        dash_table.DataTable(
-                            id = 'tab2DataTable1',
-                            style_header={
-                                'backgroundColor': 'rgb(30, 30, 30)',
-                                'color': 'white'
-                            },
-                            style_data={
-                                'backgroundColor': 'rgb(50, 50, 50)',
-                                'color': 'green'
-                            }
-                        )
-                    ]
+                    id = 'tab5ContentDiv'
                 )
             ]
         ), 
@@ -342,6 +350,30 @@ app.layout = html.Div(
 def update_output( value):
     return f'You have selected {value}'
 
+# Callback to update tab2 content
+@app.callback(
+    [
+        Output('tab2DataTable1', 'value'),
+        Output('tab2DataTable1', 'columns')
+    ]
+    [
+        Input('tabs-styled-with-inline', 'value'), 
+        Input('submitButton', 'n_clicks'),
+        Input('pandas-dropdown-1', 'value')
+    ]
+)
+def render_content_tab2(tab, callbackContext, DropDownDevvalue):
+    # Instantiate the callback context, to find the button ID that triggered the callback
+    callbackContext = callback_context
+    # Get button ID
+    button_id = callbackContext.triggered[0]['prop_id'].split('.')[0]
+    if button_id == 'submitButton' and tab == 'tab-2':
+        LatencyRating()
+    elif tab == 'tab-2':
+        columns = [{"name": i, "id": i, 'type': "text", 'presentation':'markdown'} for i in df.columns ]
+        data = df.to_dict('records')
+        return data, columns
+
 # Callback to update tab3 content
 @app.callback(
     [
@@ -373,30 +405,7 @@ def render_content_tab3(tab, callbackContext, DropDownDevvalue):
         dataTable3Value = pd.DataFrame().to_dict('records')
         return dataTable1Value, dataTable2Value, dataTable3Value
 
-# Callback to update tab2 content
-@app.callback(
-    [
-        Output('tab2DataTable1', 'value'),
-        Output('tab2DataTable1', 'columns')
-    ]
-    [
-        Input('tabs-styled-with-inline', 'value'), 
-        Input('submitButton', 'n_clicks'),
-        Input('pandas-dropdown-1', 'value')
-    ]
-)
-def render_content_tab2(tab, callbackContext, DropDownDevvalue):
-    # Instantiate the callback context, to find the button ID that triggered the callback
-    callbackContext = callback_context
-    # Get button ID
-    button_id = callbackContext.triggered[0]['prop_id'].split('.')[0]
-    if button_id == 'submitButton' and tab == 'tab-2':
-        LatencyRating()
-    elif tab == 'tab-2':
-        columns = [{"name": i, "id": i, 'type': "text", 'presentation':'markdown'} for i in df.columns ]
-        data = df.to_dict('records')
-        return data, columns
-
+# Callback to update tab4 content
 @app.callback(
     [
         Output('dataTable1', 'value'),
@@ -409,7 +418,41 @@ def render_content_tab2(tab, callbackContext, DropDownDevvalue):
         Input('pandas-dropdown-1', 'value')
     ]
 )
-def render_content(tab, callbackContext, DropDownDevvalue):
+def render_content_tab4(tab, callbackContext, DropDownDevvalue):
+    # Instantiate the callback context, to find the button ID that triggered the callback
+    callbackContext = callback_context
+    # Get button ID
+    button_id = callbackContext.triggered[0]['prop_id'].split('.')[0]
+    if tab == 'tab-4':
+        if DropDownDevvalue == "100.64.0.4":
+            passwordDev = "sifi2224"
+        else:
+            passwordDev = "kali"
+        dfra = read_csv_sftp(DropDownDevvalue, "kali", "/home/kali/Reports/wifi_networks/wifi_last-01.csv", passwordDev)
+        dfra2 = dfra.iloc[:,0]
+        dfra3 = dfra.iloc[:,13]
+        return html.Div(
+            [
+                html.H3('Select Your Target ESSID and BSSID'),
+                dcc.Dropdown(dfra2),
+                dcc.Dropdown(dfra3),
+            ]
+        )
+
+# Callback to update tab5 content
+@app.callback(
+    [
+        Output('dataTable1', 'value'),
+        Output('dataTable2', 'value'),
+        Output('dataTable3', 'value')
+    ]
+    [
+        Input('tabs-styled-with-inline', 'value'), 
+        Input('submitButton', 'n_clicks'),
+        Input('pandas-dropdown-1', 'value')
+    ]
+)
+def render_content_tab5(tab, callbackContext, DropDownDevvalue):
     # Instantiate the callback context, to find the button ID that triggered the callback
     callbackContext = callback_context
     # Get button ID
@@ -420,12 +463,8 @@ def render_content(tab, callbackContext, DropDownDevvalue):
             toSSH2("100.64.0.4", "wlan0mon")
             return html.Div(
                 [
-                    #html.H3(toSSH2)
                     html.H4(        
                         dash_table.DataTable(
-                            #columns = [{'name': i, 'id': i} ],
-                            #columns=[{"name": i, "id": i, 'type': "text", 'presentation':'markdown'} for i in  read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "kali").columns ],
-                            #columns=[{"name": [["weburl"]], "id": "weburl", 'type': "", 'presentation':'markdown'}],
                             data = read_csv_sftp("100.64.0.4", "kali", "/home/kali/Reports/wifi_networks/wifi_last-01.csv", "sifi2224").to_dict('records'), style_cell={'textAlign': 'left'},
                             style_header={
                               'backgroundColor': 'rgb(30, 30, 30)',
@@ -443,12 +482,8 @@ def render_content(tab, callbackContext, DropDownDevvalue):
             toSSH2("100.64.0.2", "wlan1mon")
             return html.Div(
                 [
-                    #html.H3(toSSH2)
                     html.H4(        
                         dash_table.DataTable(
-                            #columns = [{'name': i, 'id': i} ],
-                            #columns=[{"name": i, "id": i, 'type': "text", 'presentation':'markdown'} for i in  read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "kali").columns ],
-                            #columns=[{"name": [["weburl"]], "id": "weburl", 'type': "", 'presentation':'markdown'}],
                             data = read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/wifi_last-01.csv", "kali").to_dict('records'), style_cell={'textAlign': 'left'},
                             style_header={
                               'backgroundColor': 'rgb(30, 30, 30)',
@@ -462,23 +497,6 @@ def render_content(tab, callbackContext, DropDownDevvalue):
                     )
                 ]
             )
-    if tab == 'tab-4':
-        if DropDownDevvalue == "100.64.0.4":
-            passwordDev = "sifi2224"
-        else:
-            passwordDev = "kali"
-        dfra = read_csv_sftp(DropDownDevvalue, "kali", "/home/kali/Reports/wifi_networks/wifi_last-01.csv", passwordDev)
-        #dfra=[{"name": "BSSID", "id": i, } for i in dfra.columns ],
-        dfra2 = dfra.iloc[:,0]
-        dfra3 = dfra.iloc[:,13]
-        return html.Div(
-            [
-                html.H3('Select Your Target ESSID and BSSID'),
-                dcc.Dropdown(dfra2),
-                dcc.Dropdown(dfra3),
-                #dcc.Dropdown(read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/wifi_last-01.csv", "kali").BSSID.unique())
-            ]
-        )
     elif tab == 'tab-5':
         if DropDownDevvalue == "100.64.0.4":
             passwordDev = "sifi2224"
@@ -486,12 +504,8 @@ def render_content(tab, callbackContext, DropDownDevvalue):
             passwordDev = "kali"
         return html.Div(
             [
-                #html.H3(toSSH2)
                 html.H4(
                     dash_table.DataTable(
-                        #columns = [{'name': i, 'id': i} ],
-                        #columns=[{"name": i, "id": i, 'type': "text", 'presentation':'markdown'} for i in  read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "kali").columns ],
-                        #columns=[{"name": [["weburl"]], "id": "weburl", 'type': "", 'presentation':'markdown'}],
                         data = read_csv_sftp(DropDownDevvalue, "kali", "/home/kali/Reports/wifi_networks/wifi_last-01.csv", passwordDev).to_dict('records'), style_cell={'textAlign': 'left'},
                         style_header={
                             'backgroundColor': 'rgb(30, 30, 30)',
@@ -509,10 +523,11 @@ def render_content(tab, callbackContext, DropDownDevvalue):
 # Callback to hide/display Tabbed menu content
 @app.callback(
     [
-        Output('tab-1', 'style'),
-        Output('tab-2', 'style'),
-        Output('tab-3', 'style'),
-        Output('tab-4', 'style')
+        Output('tab1ContentDiv', 'style'),
+        Output('tab2ContentDiv', 'style'),
+        Output('tab3ContentDiv', 'style'),
+        Output('tab4ContentDiv', 'style'),
+        Output('tab5ContentDiv', 'style')
     ], 
     Input('tabs-styled-with-inline', 'value')
 )
@@ -522,26 +537,37 @@ def showTabContainer(selectedTab):
     tab2Style = tabbedMenu_contentStyles.tabbedMenuContent
     tab3Style = tabbedMenu_contentStyles.tabbedMenuContent
     tab4Style = tabbedMenu_contentStyles.tabbedMenuContent
+    tab5Style = tabbedMenu_contentStyles.tabbedMenuContent
     if selectedTab == 'tab-1':
         tab1Style['display'] = 'inline'
         tab2Style['display'] = 'none'
         tab3Style['display'] = 'none'
         tab4Style['display'] = 'none'
+        tab5Style['display'] = 'none'
     elif selectedTab == 'tab-2':
         tab1Style['display'] = 'none'
         tab2Style['display'] = 'inline'
         tab3Style['display'] = 'none'
         tab4Style['display'] = 'none'
+        tab5Style['display'] = 'none'
     elif selectedTab == 'tab-3':
         tab1Style['display'] = 'none'
         tab2Style['display'] = 'none'
         tab3Style['display'] = 'inline'
         tab4Style['display'] = 'none'
-    else:
+        tab5Style['display'] = 'none'
+    elif selectedTab == 'tab-4':
         tab1Style['display'] = 'none'
         tab2Style['display'] = 'none'
         tab3Style['display'] = 'none'
         tab4Style['display'] = 'inline'
+        tab5Style['display'] = 'none'
+    else:
+        tab1Style['display'] = 'none'
+        tab2Style['display'] = 'none'
+        tab3Style['display'] = 'none'
+        tab4Style['display'] = 'none'
+        tab5Style['display'] = 'inline'
     return tab1Style, tab2Style, tab3Style, tab4Style
 
 if __name__ == '__main__':
