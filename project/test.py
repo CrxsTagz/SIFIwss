@@ -101,22 +101,6 @@ def toSSH2(host, interfaceValue):
     #lines = ""
     return 
 
-#def UpdateSSIDTable():           
-#   dash_table.DataTable(
-#      columns = [{'name': i, 'id': i} ],
-#      columns=[{"name": i, "id": i, 'type': "text", 'presentation':'markdown'} for i in  read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "kali").columns ],
-#      columns=[{"name": [["weburl"]], "id": "weburl", 'type': "", 'presentation':'markdown'}],
-#      data = read_csv_sftp("100.64.0.77", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "kali").to_dict('records'), style_cell={'textAlign': 'left'},
-#      style_header={
-#          'backgroundColor': 'rgb(30, 30, 30)',
-#          'color': 'white'
-#      },
-#      style_data={
-#          'backgroundColor': 'rgb(50, 50, 50)',
-#          'color': 'white'
-#      },            
-#   )
-
 def check_ping(ip):
     response = os.system("ping -n 1 " + ip)
     # and then check the response...
@@ -253,25 +237,26 @@ app.layout = html.Div(
             children = [
                 # Tab3 Content
                 html.Div(
-                    [
+                    id = 'tab3ContentDiv',
+                    children = [
                         html.H3('Sifi Agent 64.2: SSID list'),
                         html.H4(        
                             dash_table.DataTable(
-                                id = 'dataTable1',
+                                id = 'tab3DataTable1',
                                 style_cell={'textAlign': 'left'}
                             )            
                         ), 
                         html.H3('Sifi Agent 64.4: SSID list'),
                         html.H4(   
                             dash_table.DataTable(
-                                id = 'dataTable2',
+                                id = 'tab3DataTable2',
                                 style_cell={'textAlign': 'left'}
                             )
                         ),
                         html.H3('Sifi Agent 64.77: SSID list'),
                         html.H4(
                             dash_table.DataTable(
-                                id = 'dataTable3',
+                                id = 'tab3DataTable3',
                                 style_cell={'textAlign': 'left'}
                             )
                         )
@@ -279,7 +264,27 @@ app.layout = html.Div(
                 ),
                 # Tab1 Content
                 html.Div(
-                    html.H1('Welcome to Sifi WSS')
+                    id = 'tab1ContentDiv',
+                    children = [
+                        html.H1('Welcome to Sifi WSS')
+                    ]
+                ),
+                # Tab2 Content
+                html.Div(
+                    id = 'tab2ContentDiv',
+                    children = [
+                        dash_table.DataTable(
+                            id = 'tab2DataTable1',
+                            style_header={
+                                'backgroundColor': 'rgb(30, 30, 30)',
+                                'color': 'white'
+                            },
+                            style_data={
+                                'backgroundColor': 'rgb(50, 50, 50)',
+                                'color': 'green'
+                            }
+                        )
+                    ]
                 )
             ]
         ), 
@@ -340,9 +345,9 @@ def update_output( value):
 # Callback to update tab3 content
 @app.callback(
     [
-        Output('dataTable1', 'value'),
-        Output('dataTable2', 'value'),
-        Output('dataTable3', 'value')
+        Output('tab3DataTable1', 'value'),
+        Output('tab3DataTable2', 'value'),
+        Output('tab3DataTable3', 'value')
     ]
     [
         Input('tabs-styled-with-inline', 'value'), 
@@ -371,9 +376,8 @@ def render_content_tab3(tab, callbackContext, DropDownDevvalue):
 # Callback to update tab2 content
 @app.callback(
     [
-        Output('dataTable1', 'value'),
-        Output('dataTable2', 'value'),
-        Output('dataTable3', 'value')
+        Output('tab2DataTable1', 'value'),
+        Output('tab2DataTable1', 'columns')
     ]
     [
         Input('tabs-styled-with-inline', 'value'), 
@@ -389,24 +393,9 @@ def render_content_tab2(tab, callbackContext, DropDownDevvalue):
     if button_id == 'submitButton' and tab == 'tab-2':
         LatencyRating()
     elif tab == 'tab-2':
-        return html.Div(
-            [
-                dash_table.DataTable(
-                #columns = [{'name': i, 'id': i} ],
-                columns=[{"name": i, "id": i, 'type': "text", 'presentation':'markdown'} for i in df.columns ],
-                #columns=[{"name": [["weburl"]], "id": "weburl", 'type': "", 'presentation':'markdown'}],
-                data = df.to_dict('records'),
-                style_header={
-                        'backgroundColor': 'rgb(30, 30, 30)',
-                        'color': 'white'
-                    },
-                    style_data={
-                        'backgroundColor': 'rgb(50, 50, 50)',
-                        'color': 'green'
-                    }
-                )
-            ]
-        )
+        columns = [{"name": i, "id": i, 'type': "text", 'presentation':'markdown'} for i in df.columns ]
+        data = df.to_dict('records')
+        return data, columns
 
 @app.callback(
     [
@@ -420,16 +409,14 @@ def render_content_tab2(tab, callbackContext, DropDownDevvalue):
         Input('pandas-dropdown-1', 'value')
     ]
 )
-def render_content(tab, callbackContext,DropDownDevvalue):
+def render_content(tab, callbackContext, DropDownDevvalue):
     # Instantiate the callback context, to find the button ID that triggered the callback
     callbackContext = callback_context
     # Get button ID
     button_id = callbackContext.triggered[0]['prop_id'].split('.')[0]
 
-    if button_id == 'submitButton' and tab == 'tab-2':
-        LatencyRating()
     if button_id == 'submitButton' and tab == 'tab-5':
-        if DropDownDevvalue == "10.64.0.4":
+        if DropDownDevvalue == "100.64.0.4":
             toSSH2("100.64.0.4", "wlan0mon")
             return html.Div(
                 [
@@ -475,26 +462,6 @@ def render_content(tab, callbackContext,DropDownDevvalue):
                     )
                 ]
             )
-    elif tab == 'tab-2':
-        return html.Div(
-            [
-                dash_table.DataTable(
-                #columns = [{'name': i, 'id': i} ],
-                columns=[{"name": i, "id": i, 'type': "text", 'presentation':'markdown'} for i in df.columns ],
-                #columns=[{"name": [["weburl"]], "id": "weburl", 'type': "", 'presentation':'markdown'}],
-                data = df.to_dict('records'),
-                style_header={
-                        'backgroundColor': 'rgb(30, 30, 30)',
-                        'color': 'white'
-                    },
-                    style_data={
-                        'backgroundColor': 'rgb(50, 50, 50)',
-                        'color': 'green'
-                    }
-                )
-            ]
-        )
-    
     if tab == 'tab-4':
         if DropDownDevvalue == "100.64.0.4":
             passwordDev = "sifi2224"
