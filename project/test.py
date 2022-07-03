@@ -287,10 +287,10 @@ def render_content(tab, callbackContext,DropDownDevvalue):
     button_id = callbackContext.triggered[0]['prop_id'].split('.')[0]
     if button_id == 'submitButton'and tab == 'tab-3':
         #if check_ping("100.64.0.2") == True:
-            toSSH("100.64.0.2", "kali", "wlan1mon")
+        #toSSH("100.64.0.2", "kali", "wlan1mon")
           
         #if check_ping("100.64.0.4") == True:
-            toSSH("100.64.0.4", "sifi2224", "wlan0mon")
+        #toSSH("100.64.0.4", "sifi2224", "wlan0mon")
             
         #if check_ping("100.64.0.77") == True:
            # toSSH("100.64.0.77", "kali", "wlan1mon")
@@ -303,7 +303,7 @@ def render_content(tab, callbackContext,DropDownDevvalue):
 
                         #columns=[{"name": i, "id": i, 'type': "text", 'presentation':'markdown'} for i in  read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "kali").columns ],
                        # columns=[{"name": [["weburl"]], "id": "weburl", 'type': "", 'presentation':'markdown'}],
-                    data = read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "kali").to_dict('records'), style_cell={'textAlign': 'left'},           
+                    data = read_csv_sftp("100.64.0.1", "ittadmin", "/home/ittadmin/Reports/wifi_networks/100.64.0.2/basic.wifi.csv", "L1br0Sh@rkR1ng").to_dict('records'), style_cell={'textAlign': 'left'},           
                             )            
                 ), html.H3('Sifi Agent 64.4: SSID list'),
                 html.H4(   
@@ -312,21 +312,21 @@ def render_content(tab, callbackContext,DropDownDevvalue):
 
                         #columns=[{"name": i, "id": i, 'type': "text", 'presentation':'markdown'} for i in  read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "kali").columns ],
                        # columns=[{"name": [["weburl"]], "id": "weburl", 'type': "", 'presentation':'markdown'}],
-                    data = read_csv_sftp("100.64.0.4", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "sifi2224").to_dict('records'), style_cell={'textAlign': 'left'},     
+                    data = read_csv_sftp("100.64.0.1", "ittadmin", "/home/ittadmin/Reports/wifi_networks/100.64.0.4/basic.wifi.csv", "L1br0Sh@rkR1ng").to_dict('records'), style_cell={'textAlign': 'left'},     
                         ), 
                 ),
 
-                        html.H3('Sifi Agent 64.77: SSID list'),
-            html.H4(   
+#                        html.H3('Sifi Agent 64.77: SSID list'),
+ #           html.H4(   
              
-                   dash_table.DataTable(
+  #                 dash_table.DataTable(
                         #columns = [{'name': i, 'id': i} ],
 
                         #columns=[{"name": i, "id": i, 'type': "text", 'presentation':'markdown'} for i in  read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "kali").columns ],
                        # columns=[{"name": [["weburl"]], "id": "weburl", 'type': "", 'presentation':'markdown'}],
-                  data = read_csv_sftp("100.64.0.77", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "kali").to_dict('records'), style_cell={'textAlign': 'left'},     
+   #               data = read_csv_sftp("100.64.0.77", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "kali").to_dict('records'), style_cell={'textAlign': 'left'},     
                        
-                   )),
+    #               )),
                    ])
                         
     if button_id == 'submitButton' and tab == 'tab-2':
