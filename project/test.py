@@ -85,11 +85,11 @@ def toSSH(host: str, password: str, interfaceValue: str):
     #lines = ""
     return 
     
-def toSSH2(host, interfaceValue):
+def toSSH2(host, password, interfaceValue):
     host = host
     port = 22
     username = "kali"
-    password = "kali"
+    password = password
     DATE = date.today().strftime('%Y-%m-%d-%H_%M')
     data_wifi_csv = "wifi_net" + DATE
     #command = "sudo timeout 10s airodump-ng wlan0mon -w /home/kali/Reports/wifi_networks/wifi_last --wps --output-format csv | sudo python /home/kali/Reports/wifi_networks/pyexcel.py | cat /home/kali/Reports/wifi_networks/wifi_last-01.csv"
@@ -260,10 +260,11 @@ app.layout = html.Div([
 def update_output(value):
     if value == "100.64.0.4":
         passwordDev = "sifi2224"
-            
+        directory = "/home/ittadmin/Reports/wifi_networks/100.64.0.4/wifi_last-01.csv"
     else:
         passwordDev = "kali"
-    dfra = read_csv_sftp(value, "kali", "/home/kali/Reports/wifi_networks/wifi_last-01.csv", passwordDev)
+        directory = "/home/ittadmin/Reports/wifi_networks/100.64.0.2/wifi_last-01.csv"
+    dfra = read_csv_sftp("100.64.0.1", "ittadmin", directory, "L1br0Sh@rkR1ng")
     #dfra=[{"name": "BSSID", "id": i, } for i in dfra.columns ],
     dfra4 = dfra.iloc[:, 0]
     dfra5 = dfra.iloc[:, 13]
@@ -441,10 +442,14 @@ def render_content(tab, callbackContext,DropDownDevvalue):
         #return dfra2, dfra3
     elif tab == 'tab-5':
        if DropDownDevvalue == "100.64.0.4":
-            passwordDev = "sifi2224"
+          #  passwordDev = "sifi2224"
+            directory = "/home/ittadmin/Reports/wifi_networks/100.64.0.4/wifi_last-01.csv"
+      #      toSSH2(DropDownDevvalue,passwordDev, "wlan0mon")
             
        else:
-            passwordDev = "kali"
+         #   passwordDev = "kali"
+            directory = "/home/ittadmin/Reports/wifi_networks/100.64.0.2/wifi_last-01.csv"
+       #     toSSH2(DropDownDevvalue,passwordDev, "wlan0mon")
        return html.Div([
           # html.H3(toSSH2)
             html.H4(        
@@ -453,7 +458,7 @@ def render_content(tab, callbackContext,DropDownDevvalue):
 
                         #columns=[{"name": i, "id": i, 'type': "text", 'presentation':'markdown'} for i in  read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "kali").columns ],
                        # columns=[{"name": [["weburl"]], "id": "weburl", 'type': "", 'presentation':'markdown'}],
-                    data = read_csv_sftp( DropDownDevvalue, "kali", "/home/kali/Reports/wifi_networks/wifi_last-01.csv", passwordDev).to_dict('records'), style_cell={'textAlign': 'left'},
+                    data = read_csv_sftp("100.64.0.1", "ittadmin", directory,"L1br0Sh@rkR1ng").to_dict('records'), style_cell={'textAlign': 'left'},
                         style_header={
                           'backgroundColor': 'rgb(30, 30, 30)',
                             'color': 'white'
@@ -465,8 +470,7 @@ def render_content(tab, callbackContext,DropDownDevvalue):
                             )
                 )
 
-        ]),
-    return
+        ])
 
 
 
