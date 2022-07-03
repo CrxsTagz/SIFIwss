@@ -25,6 +25,10 @@ import plotly.graph_objects as go
 
 
 
+
+
+
+
 # DB Connection Parameters
 dbPara = classes.dbCredentials()
 
@@ -158,11 +162,11 @@ def LatencyRating():
     
 
     #Rating de la conexions de los Sifi AGENTS desde el server.
-    if check_ping("100.64.0.2") == True and check_ping("100.64.0.4") == True and check_ping("100.64.0.77")  == True: 
+    if check_ping("100.64.0.2") == True and check_ping("100.64.0.4") == True: 
         df['Rating'] = df['ip'].apply ( lambda x:
-            '⭐⭐⭐' if pingdef(x) < 15 else (
-            '⭐⭐' if pingdef(x) < 30 else (
-            '⭐' if  pingdef(x) < 60  else '🔥not reliable'
+            '⭐⭐⭐' if pingdef(x) < 50 else (
+            '⭐⭐' if pingdef(x) < 70 else (
+            '⭐' if  pingdef(x) < 100  else '🔥not reliable'
               )))
 
 def SSIDDataTable():
@@ -224,13 +228,16 @@ app.layout = html.Div([
         dcc.Tab(label='Wifi Dashboard', value='tab-5', style=tab_style, selected_style=tab_selected_style, className='dark-theme-control'),
     ], style=tabs_styles),
     html.Div(id='tabs-content-inline', className='dark-theme-control'),  html.Div(id='container-button-timestamp', className='dark-theme-control'),
-    html.Button('RefreshData', id = 'submitButton', n_clicks = 0, className='dark-theme-control'),
-    dcc.Dropdown(df.ip.unique(), id='pandas-dropdown-1', placeholder="Select SifiAgent"),
+    dcc.Dropdown(df.ip.unique(), value='100.64.0.2', id='pandas-dropdown-1', placeholder="Select SifiAgent"),
+    dcc.Dropdown(id='dropdown-bssid', placeholder="BSSID"),
+    dcc.Dropdown(id='dropdown-essid', placeholder="ESSID"),
     dcc.Dropdown(
     ['WPA/WPA2 Basic Crack', 'WPA/WPA2 Advanced', '4-full-way-Handshake'],
     placeholder="Select Actions To RUN",
     multi=True
     ),
+    html.Button('LoadNetworks', id = 'submitButton2', n_clicks = 0),
+    html.Button('RefreshData', id = 'submitButton', n_clicks = 0),
     html.Div(id='pandas-output-container-1', className='dark-theme-control'),
     dcc.Interval(
         id='dataUpateInterval', 
@@ -243,16 +250,30 @@ app.layout = html.Div([
 
 
 ])
-  
+
 @app.callback(
     Output('pandas-output-container-1', 'children'),
+     Output('dropdown-bssid', 'options'),
+    Output('dropdown-essid', 'options'),
     Input('pandas-dropdown-1', 'value')
 )
-def update_output( value):
-    return f'You have selected {value}'
+def update_output(value):
+    if value == "100.64.0.4":
+        passwordDev = "sifi2224"
+            
+    else:
+        passwordDev = "kali"
+    dfra = read_csv_sftp(value, "kali", "/home/kali/Reports/wifi_networks/wifi_last-01.csv", passwordDev)
+    #dfra=[{"name": "BSSID", "id": i, } for i in dfra.columns ],
+    dfra4 = dfra.iloc[:, 0]
+    dfra5 = dfra.iloc[:, 13]
+    ko = f'You have selected {value}'
+    return ko, dfra4, dfra5 
+    
     
 @app.callback( 
-    Output('tabs-content-inline', 'children'), 
+    Output('tabs-content-inline', 'children'),
+
     [
         Input('tabs-styled-with-inline', 'value'), 
         Input('submitButton', 'n_clicks'),
@@ -407,22 +428,17 @@ def render_content(tab, callbackContext,DropDownDevvalue):
                             )
                 )    
         ])
-    elif tab == 'tab-4':
-        if DropDownDevvalue == "100.64.0.4":
-            passwordDev = "sifi2224"
+    #elif tab == 'tab-4':
+      #  if DropDownDevvalue == "100.64.0.4":
+       #     passwordDev = "sifi2224"
             
-        else:
-            passwordDev = "kali"
-        dfra = read_csv_sftp(DropDownDevvalue, "kali", "/home/kali/Reports/wifi_networks/wifi_last-01.csv", passwordDev)
+       # else:
+        #    passwordDev = "kali"
+        #dfra = read_csv_sftp(DropDownDevvalue, "kali", "/home/kali/Reports/wifi_networks/wifi_last-01.csv", passwordDev)
         #dfra=[{"name": "BSSID", "id": i, } for i in dfra.columns ],
-        dfra2 = dfra.iloc[:, 0]
-        dfra3 = dfra.iloc[:, 13]
-        return html.Div([
-            html.H3('Select Your Target ESSID and BSSID'),
-            dcc.Dropdown(dfra2),
-            dcc.Dropdown(dfra3),
-           # dcc.Dropdown(read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/wifi_last-01.csv", "kali").BSSID.unique())
-        ])
+       # dfra2 = dfra.iloc[:, 0]
+        #dfra3 = dfra.iloc[:, 13]
+        #return dfra2, dfra3
     elif tab == 'tab-5':
        if DropDownDevvalue == "100.64.0.4":
             passwordDev = "sifi2224"
@@ -449,7 +465,9 @@ def render_content(tab, callbackContext,DropDownDevvalue):
                             )
                 )
 
-        ])
+        ]),
+    return
+
 
 
 if __name__ == '__main__':

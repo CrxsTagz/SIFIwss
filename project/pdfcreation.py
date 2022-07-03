@@ -21,4 +21,4 @@ def getpdf():
 
 #save the pdf with the .pdf extension
 
-    pdf.output("Prueba.pdf")
+    pdf.output("/PDFReports/Prueba.pdf")
