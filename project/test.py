@@ -22,8 +22,28 @@ import dash_daq as daq
 import pandas as pd
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
+import pdfcreation
 
-
+def Wifite(host: str, password: str, essid):
+    host = host
+    port = 22
+    username = "kali"
+    password = password
+    DATE = date.today().strftime('%Y-%m-%d-%H_%M')
+    data_wifi_csv = "wifi_net" + DATE
+    #command = "sudo timeout 20s airodump-ng wlan1mon -w /home/kali/Reports/wifi_networks/"+data_wifi_csv+" --wps --output-format csv --write-interval 5 > /home/kali/Reports/wifi_networks/wifi_last.csv"
+    #command = "ls"
+    essid = essid
+    command = "sudo wifite -i wlan0mon -e "+ essid +" --no-pmkid > /home/kali/Reports/wifiteLOG.txt"
+    #command = "sudo iwlist wlan0 scan | grep ESSID"
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ssh.connect(host, port, username, password)
+    ssh.exec_command(command)
+    stdin, stdout, stderr = ssh.exec_command(command)
+    lines = stdout.readlines()
+    #lines = ""
+    return lines
 
 def toSCP(host: str, password: str):
     host = host
@@ -257,6 +277,8 @@ app.layout = html.Div([
     html.Button('LoadNetworks', id = 'submitButton2', n_clicks = 0),
     html.Button('RefreshData', id = 'submitButton', n_clicks = 0),
     html.Div(id='pandas-output-container-1', className='dark-theme-control'),
+    html.Button('E.X.E.C.U.T.E WSS', id = 'submitButton3', n_clicks = 0),
+    html.Div(id='pandas-output-container-2'),
     dcc.Interval(
         id='dataUpateInterval', 
         interval=5*1000, 
@@ -268,6 +290,14 @@ app.layout = html.Div([
 
 
 ])
+#@app.callback(
+ #   Output('pandas-output-container-2', 'children'),
+  #  Input('dropdown-bssid', 'options'),
+   #Input('dropdown-essid', 'options'),
+    #Input('pandas-dropdown-1', 'value')
+#)
+
+    
 
 @app.callback(
     Output('pandas-output-container-1', 'children'),
@@ -300,15 +330,20 @@ def update_output(value):
         Input('tabs-styled-with-inline', 'value'), 
         Input('submitButton', 'n_clicks'),
          Input('pandas-dropdown-1', 'value'),
-         Input('submitButton2', 'n_clicks'),]
+         Input('submitButton2', 'n_clicks'),
+         Input('submitButton3', 'n_clicks'),
+          Input('dropdown-bssid', 'value'),
+        Input('dropdown-essid', 'value')]
 )
-def render_content(tab, callbackContext,DropDownDevvalue,callbackContext2):
+def render_content(tab, callbackContext,DropDownDevvalue,callbackContext2,callbackContext3, bssid,essid):
     # Instantiate the callback context, to find the button ID that triggered the callback
     callbackContext = callback_context
     callbackContext2 = callback_context
+    callbackContext3 = callback_context
     # Get button ID
     button_id = callbackContext.triggered[0]['prop_id'].split('.')[0]
     button_id2 = callbackContext2.triggered[0]['prop_id'].split('.')[0]
+    button_id3 = callbackContext3.triggered[0]['prop_id'].split('.')[0]
     if button_id == 'submitButton'and tab == 'tab-3':
         if check_ping("100.64.0.2") == True and check_ping("100.64.0.4") == True:
             toSSH("100.64.0.2", "kali", "wlan0mon")
@@ -350,6 +385,9 @@ def render_content(tab, callbackContext,DropDownDevvalue,callbackContext2):
                        
     #               )),
                    ])
+    if button_id3 == 'submitButton3':
+        pdfo = pdfcreation.pdfcreator().getpdf(essid, bssid)
+        Wifite(DropDownDevvalue, "kali" , essid)
     if button_id2 == 'submitButton2':
         toSCP("100.64.0.2", "kali")     
         toSCP("100.64.0.4", "sifi2224")              
@@ -527,7 +565,13 @@ def render_content(tab, callbackContext,DropDownDevvalue,callbackContext2):
 
         ])
 
-
+#def gotapdf(tab, callbackContext,devIDip,callbackContext2,callbackContext3, bssid,essid):
+ #   callbackContext3 = callback_context
+    # Get button ID
+  #  button_id3 = callbackContext3.triggered[0]['prop_id'].split('.')[0]
+   # if button_id3 == 'submitButton3':
+    #    pdfo = pdfcreation.pdfcreator()
+     #   pdfo.getpdf(bssid, essid, devIDip)
 
 if __name__ == '__main__':
     

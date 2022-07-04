@@ -2,23 +2,24 @@ from random import random
 from fpdf import FPDF
 
 #PDF function
-
-def getpdf():
-    wpascore = random()
-    fwfhs = random()
-    #save FPDF class into a variable pdf
-    pdf = FPDF()
+class pdfcreator():
+    def getpdf(essid, bssid, devIP):
+        essid = essid
+        bssid = bssid
+        devIP = devIP
+        #save FPDF class into a variable pdf
+        pdf = FPDF()
 
 #Add page
-    pdf.add_page()
+        pdf.add_page()
 
-    pdf.set_font("Arial", size= 13)
+        pdf.set_font("Arial", size= 13)
 
 #create cells 
 
-    pdf.cell(200, 10,  txt= f"Tu score en wpa es: {wpascore}", ln= 1, align= 'L')
-    pdf.cell(200, 10,  txt= f"Tu score en wpa es: {fwfhs}", ln= 2, align= 'L')
+        pdf.cell(200, 10,  txt= f"Tu SSID seleccionado es: {essid}", ln= 1, align= 'L')
+        pdf.cell(200, 10,  txt= f"La MAC BSSID del AP es: {bssid}", ln= 2, align= 'L')
 
 #save the pdf with the .pdf extension
 
-    pdf.output("/PDFReports/Prueba.pdf")
+        pdf.output("PDFReports/PruebaWSS.pdf")
