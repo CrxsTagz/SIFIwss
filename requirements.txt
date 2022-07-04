@@ -1,3 +1,10 @@
 flask  
 flask-sqlalchemy  
 flask-login
+dash
+pandas
+mysql.connector
+pythonping
+paramiko
+dash_daq
+dash-bootstrap-components

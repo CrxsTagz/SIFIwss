@@ -22,12 +22,14 @@ import dash_daq as daq
 import pandas as pd
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
-
-
+import styleClasses
 
 # DB Connection Parameters
 dbPara = classes.dbCredentials()
+# Instantiate styles for tabbed menu content
+tabbedMenu_contentStyles = styleClasses.tabbedMenuContentStyles()
 
+#---------------------------------------FUNCTIONS-----------------------------------------
 def read_csv_sftp(hostname: str, username: str, remotepath: str, password: str, *args, **kwargs) -> pd.DataFrame:
     """
     Read a file from a remote host using SFTP over SSH.
@@ -56,9 +58,6 @@ def read_csv_sftp(hostname: str, username: str, remotepath: str, password: str, 
     client.close()
     return dataframe
 
-
-
-
 def toSSH(host: str, password: str, interfaceValue: str):
     host = host
     port = 22
@@ -80,7 +79,7 @@ def toSSH(host: str, password: str, interfaceValue: str):
     lines = stdout.readlines()
     #lines = ""
     return 
-    
+
 def toSSH2(host, interfaceValue):
     host = host
     port = 22
@@ -102,25 +101,6 @@ def toSSH2(host, interfaceValue):
     #lines = ""
     return 
 
-#def UpdateSSIDTable():
-            
-          #  dash_table.DataTable(
-                        #columns = [{'name': i, 'id': i} ],
-
-                        #columns=[{"name": i, "id": i, 'type': "text", 'presentation':'markdown'} for i in  read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "kali").columns ],
-                       # columns=[{"name": [["weburl"]], "id": "weburl", 'type': "", 'presentation':'markdown'}],
-           #         data = read_csv_sftp("100.64.0.77", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "kali").to_dict('records'), style_cell={'textAlign': 'left'},
-            #            style_header={
-             #               'backgroundColor': 'rgb(30, 30, 30)',
-              #              'color': 'white'
-               #         },
-                #        style_data={
-                 #           'backgroundColor': 'rgb(50, 50, 50)',
-                  #          'color': 'white'
-                 #       },            
-            #)
-
-
 def check_ping(ip):
     response = os.system("ping -n 1 " + ip)
     # and then check the response...
@@ -128,64 +108,61 @@ def check_ping(ip):
         pingstatus = True
     else:
         pingstatus = False
-    
     return pingstatus
-
 
 def pingdef(ip):
     response_list = ping(ip,count=10)
-
     return response_list.rtt_avg_ms
-    # Connect to DB
+
+# Connect to DB
 connectr = mysql.connector.connect(user = dbPara.dbUsername, password = dbPara.dbPassword, host = dbPara.dbServerIp , database = dbPara.dataTable)
-    # Connection must be buffered when executing multiple querys on DB before closing connection.
+# Connection must be buffered when executing multiple querys on DB before closing connection.
 pointer = connectr.cursor(buffered=True)
 pointer.execute('SELECT * FROM agents;')
 queryRaw = pointer.fetchall()
-    # Transform the query payload into a dataframe
+# Transform the query payload into a dataframe
 queryPayload = np.array(queryRaw)
 df = pd.DataFrame(queryPayload, columns=['idagents', 'ubicacion', 'ip', 'weburl', 'sshurl', 'agentname','connection'])
-#Define Up or DOW in DataTaFrame
-def LatencyRating():
-    df['connection'] = df['ip'].apply(lambda x:
-        'DOWN' if check_ping(x) == False else( 'UP' 
-        
-                            ))
-    
-    #Add Latency Column to DataFrame
-    df['Latency(ms)'] = df['ip'].apply(lambda x:pingdef(x)
-        if check_ping(x) == True else ('0'))
-    
 
+# Define Up or DOW in DataTaFrame
+def LatencyRating():
+    df['connection'] = df['ip'].apply(
+        lambda x:
+            'DOWN' if check_ping(x) == False else('UP')
+        )
+    #Add Latency Column to DataFrame
+    df['Latency(ms)'] = df['ip'].apply(
+        lambda x:
+            pingdef(x)
+            if check_ping(x) == True else ('0')
+        )
     #Rating de la conexions de los Sifi AGENTS desde el server.
-    if check_ping("100.64.0.2") == True and check_ping("100.64.0.4") == True and check_ping("100.64.0.77")  == True: 
-        df['Rating'] = df['ip'].apply ( lambda x:
+    if check_ping("100.64.0.2") == True and check_ping("100.64.0.4") == True and check_ping("100.64.0.77")  == True:
+        df['Rating'] = df['ip'].apply(
+            lambda x:
             '⭐⭐⭐' if pingdef(x) < 15 else (
-            '⭐⭐' if pingdef(x) < 30 else (
-            '⭐' if  pingdef(x) < 60  else '🔥not reliable'
-              )))
+                '⭐⭐' if pingdef(x) < 30 else (
+                    '⭐' if  pingdef(x) < 60  else '🔥not reliable'
+                )
+            )
+        )
 
 def SSIDDataTable():
     return html.Div([ html.H3('Sifi Agent 64.2: SSID list'),
             html.H4(        
                 dash_table.DataTable(
-                        #columns = [{'name': i, 'id': i} ],
-
-                        #columns=[{"name": i, "id": i, 'type': "text", 'presentation':'markdown'} for i in  read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "kali").columns ],
-                       # columns=[{"name": [["weburl"]], "id": "weburl", 'type': "", 'presentation':'markdown'}],
-                    data = read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "kali").to_dict('records'), style_cell={'textAlign': 'left'},           
-                            )            
-                ), html.H3('Sifi Agent 64.4: SSID list'),
+                    #columns = [{'name': i, 'id': i} ],
+                    #columns=[{"name": i, "id": i, 'type': "text", 'presentation':'markdown'} for i in  read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "kali").columns ],
+                    #columns=[{"name": [["weburl"]], "id": "weburl", 'type': "", 'presentation':'markdown'}],
+                    data = read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "kali").to_dict('records'), style_cell={'textAlign': 'left'},)
+                ), 
+            html.H3('Sifi Agent 64.4: SSID list'),
             html.H4(   
-                    dash_table.DataTable(
-                        #columns = [{'name': i, 'id': i} ],
-
-                        #columns=[{"name": i, "id": i, 'type': "text", 'presentation':'markdown'} for i in  read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "kali").columns ],
-                       # columns=[{"name": [["weburl"]], "id": "weburl", 'type': "", 'presentation':'markdown'}],
-                    data = read_csv_sftp("100.64.0.4", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "sifi2224").to_dict('records'), style_cell={'textAlign': 'left'},     
-                        )
-                        
-)
+                dash_table.DataTable(
+                #columns = [{'name': i, 'id': i} ],
+                #columns=[{"name": i, "id": i, 'type': "text", 'presentation':'markdown'} for i in  read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "kali").columns ],
+                #columns=[{"name": [["weburl"]], "id": "weburl", 'type': "", 'presentation':'markdown'}],
+            data = read_csv_sftp("100.64.0.4", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "sifi2224").to_dict('records'), style_cell={'textAlign': 'left'},))
         ])
 
 
@@ -198,10 +175,8 @@ theme = {
     'secondary': '#6E6E6E',
 }
 
+tabs_styles = {'height': '44px'}
 
-tabs_styles = {
-    'height': '44px'
-}
 tab_style = {
     'borderBottom': '5px solid #d6d6d6',
     'padding': '10px',
@@ -216,6 +191,7 @@ tab_selected_style = {
     'padding': '8px'
 }
 
+<<<<<<< HEAD
 app.layout = html.Div([ 
     dcc.Tabs(id="tabs-styled-with-inline", value='tab-1', className='dark-theme-control', children=[
         dcc.Tab(label='Sifi Agents', value='tab-2', style=tab_style, selected_style=tab_selected_style, className='dark-theme-control'),
@@ -241,217 +217,348 @@ app.layout = html.Div([
  
     
 
+=======
+#---------------------------------------FRONTEND-----------------------------------------
+app.layout = html.Div(
+    [
+        # Tabbed menu
+        dcc.Tabs(
+            id="tabs-styled-with-inline", 
+            value='tab-1', 
+            className='dark-theme-control', 
+            children=[
+                dcc.Tab(
+                    label='Sifi Agents', 
+                    value='tab-2', 
+                    style=tab_style, 
+                    selected_style=tab_selected_style, 
+                    className='dark-theme-control'
+                ),
+                dcc.Tab(
+                    label='Pre-Run', 
+                    value='tab-3', 
+                    style=tab_style, 
+                    selected_style=tab_selected_style, 
+                    className='dark-theme-control'
+                ),
+                dcc.Tab(
+                    label='Wireless Assessment', 
+                    value='tab-4', 
+                    style=tab_style, 
+                    selected_style=tab_selected_style, 
+                    className='dark-theme-control'
+                ),
+                dcc.Tab(
+                    label='Wifi Dashboard', 
+                    value='tab-5', 
+                    style=tab_style, 
+                    selected_style=tab_selected_style, 
+                    className='dark-theme-control'
+                ),
+            ], 
+            style=tabs_styles
+        ),
+        html.Div(
+            id='tabs-content-inline', 
+            className='dark-theme-control',
+            children = [
+                # Tab1 Content
+                html.Div(
+                    id = 'tab1ContentDiv',
+                    children = [
+                        html.H1('Welcome to Sifi WSS')
+                    ]
+                ),
+                # Tab2 Content
+                html.Div(
+                    id = 'tab2ContentDiv',
+                    children = [
+                        dash_table.DataTable(
+                            id = 'tab2DataTable1',
+                            style_header={
+                                'backgroundColor': 'rgb(30, 30, 30)',
+                                'color': 'white'
+                            },
+                            style_data={
+                                'backgroundColor': 'rgb(50, 50, 50)',
+                                'color': 'green'
+                            }
+                        )
+                    ]
+                ),
+                # Tab3 Content
+                html.Div(
+                    id = 'tab3ContentDiv',
+                    children = [
+                        html.H3('Sifi Agent 64.2: SSID list'),
+                        html.H4(        
+                            dash_table.DataTable(
+                                id = 'tab3DataTable1',
+                                style_cell={'textAlign': 'left'}
+                            )            
+                        ), 
+                        html.H3('Sifi Agent 64.4: SSID list'),
+                        html.H4(   
+                            dash_table.DataTable(
+                                id = 'tab3DataTable2',
+                                style_cell={'textAlign': 'left'}
+                            )
+                        ),
+                        html.H3('Sifi Agent 64.77: SSID list'),
+                        html.H4(
+                            dash_table.DataTable(
+                                id = 'tab3DataTable3',
+                                style_cell={'textAlign': 'left'}
+                            )
+                        )
+                    ]
+                ),
+                # Tab4 Content
+                html.Div(
+                    id = 'tab4ContentDiv',
+                    children = [
+                        html.H3('Select Your Target ESSID and BSSID'),
+                        dcc.Dropdown(
+                            id = 'drpDown2'
+                        ),
+                        dcc.Dropdown(
+                            id = 'drpDown3'
+                        )
+                    ]
+                ),
+                # Tab5 Content
+                html.Div(
+                    id = 'tab5ContentDiv',
+                    children = [
+                        html.H4(
+                            dash_table.DataTable(
+                                id = 'tab5DatatableData',
+                                style_cell={
+                                    'textAlign': 'left'
+                                },
+                                style_header={
+                                    'backgroundColor': 'rgb(30, 30, 30)',
+                                    'color': 'green'
+                                },
+                                style_data={
+                                    'backgroundColor': 'rgb(50, 50, 50)',
+                                    'color': 'green'
+                                }
+                            )
+                        )
+                    ]
+                )
+            ]
+        ), 
+        html.Div(
+            id='container-button-timestamp', 
+            className='dark-theme-control'
+        ),
+        html.Button(
+            'RefreshData', 
+            id = 'submitButton', 
+            n_clicks = 0, 
+            className='dark-theme-control'
+        ),
+        dcc.Dropdown(
+            df.ip.unique(), 
+            id='pandas-dropdown-1', 
+            placeholder="Select SifiAgent"
+        ),
+        dcc.Dropdown(
+            [
+                'WPA/WPA2 Basic Crack', 
+                'WPA/WPA2 Advanced', 
+                '4-full-way-Handshake'
+            ],
+            placeholder="Select Actions To RUN",
+            multi=True
+        ),
+        html.Div(
+            id='pandas-output-container-1', 
+            className='dark-theme-control'
+        ),
+        dcc.Interval(
+            id='dataUpateInterval', 
+            interval=5*1000, 
+            n_intervals=0
+        ), 
+        dbc.Alert(
+            id='tbl_out', 
+            className='dark-theme-control'
+        ),
+        html.Div(
+            [
+                html.Img(src=app.get_asset_url('sifi.png')), 
+                html.H3("A cup of Sifi running like a coffee!")
+            ]
+        )
+    ]
+)
+>>>>>>> 8ecfeda6389d58fe9ae923400865072d5327bab7
 
-])
-  
+#---------------------------------------CALLBACKS-----------------------------------------
 @app.callback(
     Output('pandas-output-container-1', 'children'),
     Input('pandas-dropdown-1', 'value')
 )
 def update_output( value):
     return f'You have selected {value}'
-    
-@app.callback( 
-    Output('tabs-content-inline', 'children'), 
+
+# Callback to update tab2 content
+@app.callback(
+    [
+        Output('tab2DataTable1', 'value'),
+        Output('tab2DataTable1', 'columns')
+    ]
     [
         Input('tabs-styled-with-inline', 'value'), 
-        Input('submitButton', 'n_clicks'),
-         Input('pandas-dropdown-1', 'value') ]
+        Input('submitButton', 'n_clicks')
+    ]
 )
-def render_content(tab, callbackContext,DropDownDevvalue):
+def render_content_tab2(tab, callbackContext):
     # Instantiate the callback context, to find the button ID that triggered the callback
     callbackContext = callback_context
     # Get button ID
     button_id = callbackContext.triggered[0]['prop_id'].split('.')[0]
-    if button_id == 'submitButton'and tab == 'tab-3':
-        #if check_ping("100.64.0.2") == True:
-            toSSH("100.64.0.2", "kali", "wlan1mon")
-          
-        #if check_ping("100.64.0.4") == True:
-            toSSH("100.64.0.4", "sifi2224", "wlan0mon")
-            
-        #if check_ping("100.64.0.77") == True:
-           # toSSH("100.64.0.77", "kali", "wlan1mon")
-           
-       # SSIDDataTable()
-            return html.Div([ html.H3('Sifi Agent 64.2: SSID list'),
-                html.H4(        
-                dash_table.DataTable(
-                        #columns = [{'name': i, 'id': i} ],
-
-                        #columns=[{"name": i, "id": i, 'type': "text", 'presentation':'markdown'} for i in  read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "kali").columns ],
-                       # columns=[{"name": [["weburl"]], "id": "weburl", 'type': "", 'presentation':'markdown'}],
-                    data = read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "kali").to_dict('records'), style_cell={'textAlign': 'left'},           
-                            )            
-                ), html.H3('Sifi Agent 64.4: SSID list'),
-                html.H4(   
-                    dash_table.DataTable(
-                        #columns = [{'name': i, 'id': i} ],
-
-                        #columns=[{"name": i, "id": i, 'type': "text", 'presentation':'markdown'} for i in  read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "kali").columns ],
-                       # columns=[{"name": [["weburl"]], "id": "weburl", 'type': "", 'presentation':'markdown'}],
-                    data = read_csv_sftp("100.64.0.4", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "sifi2224").to_dict('records'), style_cell={'textAlign': 'left'},     
-                        ), 
-                ),
-
-                        html.H3('Sifi Agent 64.77: SSID list'),
-            html.H4(   
-             
-                   dash_table.DataTable(
-                        #columns = [{'name': i, 'id': i} ],
-
-                        #columns=[{"name": i, "id": i, 'type': "text", 'presentation':'markdown'} for i in  read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "kali").columns ],
-                       # columns=[{"name": [["weburl"]], "id": "weburl", 'type': "", 'presentation':'markdown'}],
-                  data = read_csv_sftp("100.64.0.77", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "kali").to_dict('records'), style_cell={'textAlign': 'left'},     
-                       
-                   )),
-                   ])
-                        
     if button_id == 'submitButton' and tab == 'tab-2':
         LatencyRating()
-    if button_id == 'submitButton' and tab == 'tab-5':
-        if DropDownDevvalue == "10.64.0.4":
-            toSSH2("100.64.0.4", "wlan0mon")
-            return html.Div([
-          # html.H3(toSSH2)
-            html.H4(        
-                dash_table.DataTable(
-                        #columns = [{'name': i, 'id': i} ],
-
-                        #columns=[{"name": i, "id": i, 'type': "text", 'presentation':'markdown'} for i in  read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "kali").columns ],
-                       # columns=[{"name": [["weburl"]], "id": "weburl", 'type': "", 'presentation':'markdown'}],
-                            
-                                data = read_csv_sftp("100.64.0.4", "kali", "/home/kali/Reports/wifi_networks/wifi_last-01.csv", "sifi2224").to_dict('records'), style_cell={'textAlign': 'left'},
-                        style_header={
-                          'backgroundColor': 'rgb(30, 30, 30)',
-                            'color': 'green'
-                        },
-                        style_data={
-                            'backgroundColor': '#00d1b2',
-                            'color': 'green'
-                        }          
-                            )
-                )
-
-                    ])
-        elif DropDownDevvalue =="100.64.0.2":
-            toSSH2("100.64.0.2", "wlan1mon")
-            return html.Div([
-          # html.H3(toSSH2)
-            html.H4(        
-                dash_table.DataTable(
-                        #columns = [{'name': i, 'id': i} ],
-
-                        #columns=[{"name": i, "id": i, 'type': "text", 'presentation':'markdown'} for i in  read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "kali").columns ],
-                       # columns=[{"name": [["weburl"]], "id": "weburl", 'type': "", 'presentation':'markdown'}],
-                            
-                                data = read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/wifi_last-01.csv", "kali").to_dict('records'), style_cell={'textAlign': 'left'},
-                        style_header={
-                          'backgroundColor': 'rgb(30, 30, 30)',
-                            'color': 'green'
-                        },
-                        style_data={
-                            'backgroundColor': 'rgb(50, 50, 50)',
-                            'color': 'green'
-                        }          
-                            )
-                )
-
-                    ])
-        
-
-    if tab == 'tab-1':
-        return html.Div([
-            html.H3('Welcome to Sifi WSS')
-        ])
     elif tab == 'tab-2':
-        return html.Div([
-            
+        columns = [{"name": i, "id": i, 'type': "text", 'presentation':'markdown'} for i in df.columns ]
+        data = df.to_dict('records')
+        return data, columns
 
-                      dash_table.DataTable(
-                        #columns = [{'name': i, 'id': i} ],
-
-                        columns=[{"name": i, "id": i, 'type': "text", 'presentation':'markdown'} for i in df.columns ],
-                       # columns=[{"name": [["weburl"]], "id": "weburl", 'type': "", 'presentation':'markdown'}],
-                        data = df.to_dict('records'),
-                        
-                        
-                      style_header={
-                          'backgroundColor': 'rgb(30, 30, 30)',
-                            'color': 'white'
-                        },
-                        style_data={
-                            'backgroundColor': 'rgb(50, 50, 50)',
-                            'color': 'green'
-                        }         ) 
-                         
-        ])
+# Callback to update tab3 content
+@app.callback(
+    [
+        Output('tab3DataTable1', 'value'),
+        Output('tab3DataTable2', 'value'),
+        Output('tab3DataTable3', 'value')
+    ]
+    [
+        Input('tabs-styled-with-inline', 'value'), 
+        Input('submitButton', 'n_clicks')
+    ]
+)
+def render_content_tab3(tab, callbackContext):
+    # Instantiate the callback context, to find the button ID that triggered the callback
+    callbackContext = callback_context
+    # Get button ID
+    button_id = callbackContext.triggered[0]['prop_id'].split('.')[0]
+    if button_id == 'submitButton' and tab == 'tab-3':
+        toSSH("100.64.0.2", "kali", "wlan1mon")
+        toSSH("100.64.0.4", "sifi2224", "wlan0mon")
+        dataTable1Value = read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "kali").to_dict('records')
+        dataTable2Value = read_csv_sftp("100.64.0.4", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "sifi2224").to_dict('records')
+        dataTable3Value = read_csv_sftp("100.64.0.77", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "kali").to_dict('records')
+        return dataTable1Value, dataTable2Value, dataTable3Value
     elif tab == 'tab-3':
-        return html.Div([ 
-            html.H4( "Here you can Discover SSID's with your SifiAgents"),
-              html.H4(        
-                dash_table.DataTable( 
-                        #columns = [{'name': i, 'id': i} ],
+        dataTable1Value = read_csv_sftp("100.64.0.1", "ittadmin", "/home/ittadmin/Reports/basic.wifi.csv", "L1br0Sh@rkR1ng").to_dict('records')
+        dataTable2Value = pd.DataFrame().to_dict('records')
+        dataTable3Value = pd.DataFrame().to_dict('records')
+        return dataTable1Value, dataTable2Value, dataTable3Value
 
-                        #columns=[{"name": i, "id": i, 'type': "text", 'presentation':'markdown'} for i in  read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "kali").columns ],
-                       # columns=[{"name": [["weburl"]], "id": "weburl", 'type': "", 'presentation':'markdown'}],
-                    data = read_csv_sftp("100.64.0.1", "ittadmin", "/home/ittadmin/Reports/basic.wifi.csv", "L1br0Sh@rkR1ng").to_dict('records'), style_cell={'textAlign': 'left'},
-                        style_header={
-                          'backgroundColor': 'rgb(30, 30, 30)',
-                            'color': 'white'
-                        },
-                        style_data={
-                            'backgroundColor': 'rgb(50, 50, 50)',
-                            'color': 'white'
-                        },            
-                            )
-                )    
-        ])
-    elif tab == 'tab-4':
+# Callback to update tab4 content
+@app.callback(
+    [
+        Output('drpDown2', 'options'),
+        Output('drpDown3', 'options')
+    ]
+    [
+        Input('tabs-styled-with-inline', 'value'), 
+        Input('pandas-dropdown-1', 'value')
+    ]
+)
+def render_content_tab4(tab, DropDownDevvalue):
+    if tab == 'tab-4':
         if DropDownDevvalue == "100.64.0.4":
             passwordDev = "sifi2224"
-            
         else:
             passwordDev = "kali"
         dfra = read_csv_sftp(DropDownDevvalue, "kali", "/home/kali/Reports/wifi_networks/wifi_last-01.csv", passwordDev)
-        #dfra=[{"name": "BSSID", "id": i, } for i in dfra.columns ],
-        dfra2 = dfra.iloc[:, 0]
-        dfra3 = dfra.iloc[:, 13]
-        return html.Div([
-            html.H3('Select Your Target ESSID and BSSID'),
-            dcc.Dropdown(dfra2),
-            dcc.Dropdown(dfra3),
-           # dcc.Dropdown(read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/wifi_last-01.csv", "kali").BSSID.unique())
-        ])
+        dfra2 = dfra.iloc[:,0]
+        dfra3 = dfra.iloc[:,13]
+        return dfra2, dfra3
+
+# Callback to update tab5 content
+@app.callback(
+    Output('tab5DatatableData', 'value'),
+    [
+        Input('tabs-styled-with-inline', 'value'), 
+        Input('submitButton', 'n_clicks'),
+        Input('pandas-dropdown-1', 'value')
+    ]
+)
+def render_content_tab5(tab, callbackContext, DropDownDevvalue):
+    # Instantiate the callback context, to find the button ID that triggered the callback
+    callbackContext = callback_context
+    # Get button ID
+    button_id = callbackContext.triggered[0]['prop_id'].split('.')[0]
+
+    if button_id == 'submitButton' and tab == 'tab-5':
+        if DropDownDevvalue == "100.64.0.4":
+            toSSH2("100.64.0.4", "wlan0mon")
+            data = read_csv_sftp("100.64.0.4", "kali", "/home/kali/Reports/wifi_networks/wifi_last-01.csv", "sifi2224").to_dict('records')
+        elif DropDownDevvalue =="100.64.0.2":
+            toSSH2("100.64.0.2", "wlan1mon")
+            data = read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/wifi_last-01.csv", "kali").to_dict('records')      
     elif tab == 'tab-5':
-       if DropDownDevvalue == "100.64.0.4":
+        if DropDownDevvalue == "100.64.0.4":
             passwordDev = "sifi2224"
-            
-       else:
+        else:
             passwordDev = "kali"
-       return html.Div([
-          # html.H3(toSSH2)
-            html.H4(        
-                dash_table.DataTable(
-                        #columns = [{'name': i, 'id': i} ],
+        data = read_csv_sftp(DropDownDevvalue, "kali", "/home/kali/Reports/wifi_networks/wifi_last-01.csv", passwordDev).to_dict('records')
+    return data
 
-                        #columns=[{"name": i, "id": i, 'type': "text", 'presentation':'markdown'} for i in  read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "kali").columns ],
-                       # columns=[{"name": [["weburl"]], "id": "weburl", 'type': "", 'presentation':'markdown'}],
-                    data = read_csv_sftp( DropDownDevvalue, "kali", "/home/kali/Reports/wifi_networks/wifi_last-01.csv", passwordDev).to_dict('records'), style_cell={'textAlign': 'left'},
-                        style_header={
-                          'backgroundColor': 'rgb(30, 30, 30)',
-                            'color': 'white'
-                        },
-                        style_data={
-                            'backgroundColor': 'rgb(50, 50, 50)',
-                            'color': 'white'
-                        }          
-                            )
-                )
-
-        ])
-
+# Callback to hide/display Tabbed menu content
+@app.callback(
+    [
+        Output('tab1ContentDiv', 'style'),
+        Output('tab2ContentDiv', 'style'),
+        Output('tab3ContentDiv', 'style'),
+        Output('tab4ContentDiv', 'style'),
+        Output('tab5ContentDiv', 'style')
+    ], 
+    Input('tabs-styled-with-inline', 'value')
+)
+def showTabContainer(selectedTab):
+    # Instantiate tabbed content styles
+    tab1Style = tabbedMenu_contentStyles.tabbedMenuContent
+    tab2Style = tabbedMenu_contentStyles.tabbedMenuContent
+    tab3Style = tabbedMenu_contentStyles.tabbedMenuContent
+    tab4Style = tabbedMenu_contentStyles.tabbedMenuContent
+    tab5Style = tabbedMenu_contentStyles.tabbedMenuContent
+    if selectedTab == 'tab-1':
+        tab1Style['display'] = 'inline'
+        tab2Style['display'] = 'none'
+        tab3Style['display'] = 'none'
+        tab4Style['display'] = 'none'
+        tab5Style['display'] = 'none'
+    elif selectedTab == 'tab-2':
+        tab1Style['display'] = 'none'
+        tab2Style['display'] = 'inline'
+        tab3Style['display'] = 'none'
+        tab4Style['display'] = 'none'
+        tab5Style['display'] = 'none'
+    elif selectedTab == 'tab-3':
+        tab1Style['display'] = 'none'
+        tab2Style['display'] = 'none'
+        tab3Style['display'] = 'inline'
+        tab4Style['display'] = 'none'
+        tab5Style['display'] = 'none'
+    elif selectedTab == 'tab-4':
+        tab1Style['display'] = 'none'
+        tab2Style['display'] = 'none'
+        tab3Style['display'] = 'none'
+        tab4Style['display'] = 'inline'
+        tab5Style['display'] = 'none'
+    else:
+        tab1Style['display'] = 'none'
+        tab2Style['display'] = 'none'
+        tab3Style['display'] = 'none'
+        tab4Style['display'] = 'none'
+        tab5Style['display'] = 'inline'
+    return tab1Style, tab2Style, tab3Style, tab4Style, tab5Style
 
 if __name__ == '__main__':
-    
     app.run_server(debug=True, host='0.0.0.0', port='5007', dev_tools_silence_routes_logging=False)
