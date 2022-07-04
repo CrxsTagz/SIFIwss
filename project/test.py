@@ -34,7 +34,8 @@ def Wifite(host: str, password: str, essid):
     #command = "sudo timeout 20s airodump-ng wlan1mon -w /home/kali/Reports/wifi_networks/"+data_wifi_csv+" --wps --output-format csv --write-interval 5 > /home/kali/Reports/wifi_networks/wifi_last.csv"
     #command = "ls"
     essid = essid
-    command = "sudo wifite -i wlan0mon -e "+ essid +" --no-pmkid > /home/kali/Reports/wifiteLOG.txt"
+    command = "screen -dmSL SIFI sudo wifite -i wlan0mon -e "+ essid +" --no-pmkid"
+    #command = "sudo besside-ng wlan0mon -b "+ bssid +" -vv"
     #command = "sudo iwlist wlan0 scan | grep ESSID"
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -387,7 +388,11 @@ def render_content(tab, callbackContext,DropDownDevvalue,callbackContext2,callba
                    ])
     if button_id3 == 'submitButton3':
         pdfo = pdfcreation.pdfcreator().getpdf(essid, bssid)
-        Wifite(DropDownDevvalue, "kali" , essid)
+        if DropDownDevvalue == "100.64.0.4":
+            passwordDev = "sifi2224"
+        else:
+            passwordDev = "kali"
+        Wifite(DropDownDevvalue, passwordDev, essid)
     if button_id2 == 'submitButton2':
         toSCP("100.64.0.2", "kali")     
         toSCP("100.64.0.4", "sifi2224")              
