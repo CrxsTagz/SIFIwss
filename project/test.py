@@ -288,11 +288,38 @@ app.layout = html.Div(
                 ),
                 # Tab4 Content
                 html.Div(
-                    id = 'tab4ContentDiv'
+                    id = 'tab4ContentDiv',
+                    children = [
+                        html.H3('Select Your Target ESSID and BSSID'),
+                        dcc.Dropdown(
+                            id = 'drpDown2'
+                        ),
+                        dcc.Dropdown(
+                            id = 'drpDown3'
+                        )
+                    ]
                 ),
                 # Tab5 Content
                 html.Div(
-                    id = 'tab5ContentDiv'
+                    id = 'tab5ContentDiv',
+                    children = [
+                        html.H4(
+                            dash_table.DataTable(
+                                id = 'tab5DatatableData',
+                                style_cell={
+                                    'textAlign': 'left'
+                                },
+                                style_header={
+                                    'backgroundColor': 'rgb(30, 30, 30)',
+                                    'color': 'green'
+                                },
+                                style_data={
+                                    'backgroundColor': 'rgb(50, 50, 50)',
+                                    'color': 'green'
+                                }
+                            )
+                        )
+                    ]
                 )
             ]
         ), 
@@ -334,7 +361,7 @@ app.layout = html.Div(
             className='dark-theme-control'
         ),
         html.Div(
-            [ 
+            [
                 html.Img(src=app.get_asset_url('sifi.png')), 
                 html.H3("A cup of Sifi running like a coffee!")
             ]
@@ -358,11 +385,10 @@ def update_output( value):
     ]
     [
         Input('tabs-styled-with-inline', 'value'), 
-        Input('submitButton', 'n_clicks'),
-        Input('pandas-dropdown-1', 'value')
+        Input('submitButton', 'n_clicks')
     ]
 )
-def render_content_tab2(tab, callbackContext, DropDownDevvalue):
+def render_content_tab2(tab, callbackContext):
     # Instantiate the callback context, to find the button ID that triggered the callback
     callbackContext = callback_context
     # Get button ID
@@ -383,11 +409,10 @@ def render_content_tab2(tab, callbackContext, DropDownDevvalue):
     ]
     [
         Input('tabs-styled-with-inline', 'value'), 
-        Input('submitButton', 'n_clicks'),
-        Input('pandas-dropdown-1', 'value')
+        Input('submitButton', 'n_clicks')
     ]
 )
-def render_content_tab3(tab, callbackContext, DropDownDevvalue):
+def render_content_tab3(tab, callbackContext):
     # Instantiate the callback context, to find the button ID that triggered the callback
     callbackContext = callback_context
     # Get button ID
@@ -408,21 +433,15 @@ def render_content_tab3(tab, callbackContext, DropDownDevvalue):
 # Callback to update tab4 content
 @app.callback(
     [
-        Output('dataTable1', 'value'),
-        Output('dataTable2', 'value'),
-        Output('dataTable3', 'value')
+        Output('drpDown2', 'options'),
+        Output('drpDown3', 'options')
     ]
     [
         Input('tabs-styled-with-inline', 'value'), 
-        Input('submitButton', 'n_clicks'),
         Input('pandas-dropdown-1', 'value')
     ]
 )
-def render_content_tab4(tab, callbackContext, DropDownDevvalue):
-    # Instantiate the callback context, to find the button ID that triggered the callback
-    callbackContext = callback_context
-    # Get button ID
-    button_id = callbackContext.triggered[0]['prop_id'].split('.')[0]
+def render_content_tab4(tab, DropDownDevvalue):
     if tab == 'tab-4':
         if DropDownDevvalue == "100.64.0.4":
             passwordDev = "sifi2224"
@@ -431,21 +450,11 @@ def render_content_tab4(tab, callbackContext, DropDownDevvalue):
         dfra = read_csv_sftp(DropDownDevvalue, "kali", "/home/kali/Reports/wifi_networks/wifi_last-01.csv", passwordDev)
         dfra2 = dfra.iloc[:,0]
         dfra3 = dfra.iloc[:,13]
-        return html.Div(
-            [
-                html.H3('Select Your Target ESSID and BSSID'),
-                dcc.Dropdown(dfra2),
-                dcc.Dropdown(dfra3),
-            ]
-        )
+        return dfra2, dfra3
 
 # Callback to update tab5 content
 @app.callback(
-    [
-        Output('dataTable1', 'value'),
-        Output('dataTable2', 'value'),
-        Output('dataTable3', 'value')
-    ]
+    Output('tab5DatatableData', 'value'),
     [
         Input('tabs-styled-with-inline', 'value'), 
         Input('submitButton', 'n_clicks'),
@@ -461,64 +470,17 @@ def render_content_tab5(tab, callbackContext, DropDownDevvalue):
     if button_id == 'submitButton' and tab == 'tab-5':
         if DropDownDevvalue == "100.64.0.4":
             toSSH2("100.64.0.4", "wlan0mon")
-            return html.Div(
-                [
-                    html.H4(        
-                        dash_table.DataTable(
-                            data = read_csv_sftp("100.64.0.4", "kali", "/home/kali/Reports/wifi_networks/wifi_last-01.csv", "sifi2224").to_dict('records'), style_cell={'textAlign': 'left'},
-                            style_header={
-                              'backgroundColor': 'rgb(30, 30, 30)',
-                                'color': 'green'
-                            },
-                            style_data={
-                                'backgroundColor': '#00d1b2',
-                                'color': 'green'
-                            }          
-                        )
-                    )
-                ]
-            )
+            data = read_csv_sftp("100.64.0.4", "kali", "/home/kali/Reports/wifi_networks/wifi_last-01.csv", "sifi2224").to_dict('records')
         elif DropDownDevvalue =="100.64.0.2":
             toSSH2("100.64.0.2", "wlan1mon")
-            return html.Div(
-                [
-                    html.H4(        
-                        dash_table.DataTable(
-                            data = read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/wifi_last-01.csv", "kali").to_dict('records'), style_cell={'textAlign': 'left'},
-                            style_header={
-                              'backgroundColor': 'rgb(30, 30, 30)',
-                                'color': 'green'
-                            },
-                            style_data={
-                                'backgroundColor': 'rgb(50, 50, 50)',
-                                'color': 'green'
-                            }          
-                        )
-                    )
-                ]
-            )
+            data = read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/wifi_last-01.csv", "kali").to_dict('records')      
     elif tab == 'tab-5':
         if DropDownDevvalue == "100.64.0.4":
             passwordDev = "sifi2224"
         else:
             passwordDev = "kali"
-        return html.Div(
-            [
-                html.H4(
-                    dash_table.DataTable(
-                        data = read_csv_sftp(DropDownDevvalue, "kali", "/home/kali/Reports/wifi_networks/wifi_last-01.csv", passwordDev).to_dict('records'), style_cell={'textAlign': 'left'},
-                        style_header={
-                            'backgroundColor': 'rgb(30, 30, 30)',
-                            'color': 'white'
-                        },
-                        style_data={
-                            'backgroundColor': 'rgb(50, 50, 50)',
-                            'color': 'white'
-                        }
-                    )
-                )
-            ]
-        )
+        data = read_csv_sftp(DropDownDevvalue, "kali", "/home/kali/Reports/wifi_networks/wifi_last-01.csv", passwordDev).to_dict('records')
+    return data
 
 # Callback to hide/display Tabbed menu content
 @app.callback(
