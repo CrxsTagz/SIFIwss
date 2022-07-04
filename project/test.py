@@ -24,7 +24,7 @@ import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 import pdfcreation
 
-def Wifite(host: str, password: str, essid):
+def Wifite(host: str, password: str, bssid, interface):
     host = host
     port = 22
     username = "kali"
@@ -33,8 +33,9 @@ def Wifite(host: str, password: str, essid):
     data_wifi_csv = "wifi_net" + DATE
     #command = "sudo timeout 20s airodump-ng wlan1mon -w /home/kali/Reports/wifi_networks/"+data_wifi_csv+" --wps --output-format csv --write-interval 5 > /home/kali/Reports/wifi_networks/wifi_last.csv"
     #command = "ls"
-    essid = essid
-    command = "screen -dmSL SIFI sudo wifite -i wlan0mon -e "+ essid +" --no-pmkid"
+    bssid = bssid
+    interface = interface
+    command = "screen -dmSL SIFI sudo wifite -i "+interface+" -b "+bssid+" --no-pmkid"
     #command = "sudo besside-ng wlan0mon -b "+ bssid +" -vv"
     #command = "sudo iwlist wlan0 scan | grep ESSID"
     ssh = paramiko.SSHClient()
@@ -390,9 +391,11 @@ def render_content(tab, callbackContext,DropDownDevvalue,callbackContext2,callba
         pdfo = pdfcreation.pdfcreator().getpdf(essid, bssid)
         if DropDownDevvalue == "100.64.0.4":
             passwordDev = "sifi2224"
+            interface = "wlan0mon"
         else:
             passwordDev = "kali"
-        Wifite(DropDownDevvalue, passwordDev, essid)
+            interface = "wlan1mon"
+        Wifite(DropDownDevvalue, passwordDev, bssid, interface)
     if button_id2 == 'submitButton2':
         toSCP("100.64.0.2", "kali")     
         toSCP("100.64.0.4", "sifi2224")              
