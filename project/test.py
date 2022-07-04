@@ -125,15 +125,16 @@ def toSSH(host: str, password: str, interfaceValue: str):
     #lines = ""
     return 
     
-def toSSH2(host, password):
+def toSSH2(host, password, interface):
     host = host
     port = 22
     username = "kali"
     password = password
+    interface = interface
     DATE = date.today().strftime('%Y-%m-%d-%H_%M')
     data_wifi_csv = "wifi_net" + DATE
     #command = "sudo timeout 10s airodump-ng wlan0mon -w /home/kali/Reports/wifi_networks/wifi_last --wps --output-format csv | sudo python /home/kali/Reports/wifi_networks/pyexcel.py | cat /home/kali/Reports/wifi_networks/wifi_last-01.csv"
-    command = "sudo rm -rf /home/kali/Reports/wifi_networks/wifi_last-01.csv && sudo timeout 10s airodump-ng wlan0mon -w /home/kali/Reports/wifi_networks/wifi_last --wps --output-format csv"
+    command = "sudo rm -rf /home/kali/Reports/wifi_networks/wifi_last-01.csv && sudo timeout 10s airodump-ng "+interface+" -w /home/kali/Reports/wifi_networks/wifi_last --wps --output-format csv"
     #command = "ls"
     #command = "sudo timeout 10s wash -i wlan2mon -s -u -2 -5 -a -p > /home/kali/Reports/wifi_networks/basic.wifi.csv && cat /home/kali/Reports/wifi_networks/basic.wifi.csv"
     #command = "sudo iwlist wlan0 scan | grep ESSID"
@@ -388,7 +389,7 @@ def render_content(tab, callbackContext,DropDownDevvalue,callbackContext2,callba
     #               )),
                    ])
     if button_id3 == 'submitButton3':
-        pdfo = pdfcreation.pdfcreator().getpdf(essid, bssid)
+        pdfcreation.pdfcreator().getpdf(bssid, essid, DropDownDevvalue)
         if DropDownDevvalue == "100.64.0.4":
             passwordDev = "sifi2224"
             interface = "wlan0mon"
@@ -403,10 +404,10 @@ def render_content(tab, callbackContext,DropDownDevvalue,callbackContext2,callba
          LatencyRating()
     if button_id == 'submitButton' and tab == 'tab-5':
          if check_ping("100.64.0.2") == True and check_ping("100.64.0.4") == True:
-            toSSH2("100.64.0.2", "kali")
-            toSSH2("100.64.0.4", "sifi2224")
-            toSCP("100.64.0.2", "kali")     
-            toSCP("100.64.0.4", "sifi2224") 
+            toSSH2("100.64.0.2", "kali", "wlan1mon")
+            toSSH2("100.64.0.4", "sifi2224", "wlan0mon")
+            toSCP("100.64.0.2", "kali", "wlan1mon")     
+            toSCP("100.64.0.4", "sifi2224", "wlan0mon") 
 
 
             if DropDownDevvalue == "100.64.0.4":

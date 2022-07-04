@@ -3,7 +3,7 @@ from fpdf import FPDF
 
 #PDF function
 class pdfcreator():
-    def getpdf(essid, bssid, devIP):
+    def getpdf(bssid, essid, devIP, ok):
         essid = essid
         bssid = bssid
         devIP = devIP
