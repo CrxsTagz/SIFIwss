@@ -27,7 +27,9 @@ def json():
     return render_template('json.html')
 
 @main.route('/getpdf')
-def getpdf():
+def getpdf(self):
+    self.image('sifi-icon.png', 10, 8, 33)
+
     wpascore = random()
     fwfhs = random()
     #save FPDF class into a variable pdf
