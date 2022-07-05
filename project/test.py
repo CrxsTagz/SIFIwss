@@ -24,6 +24,43 @@ import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 import pdfcreation
 
+def Handshake(host: str, password: str, essid):
+    host = host
+    port = 22
+    username = "kali"
+    password = password
+    essid = essid
+    #command = "ls /home/kali/hs  | grep "+essid+" | > /home/kali/Reports/"+essid+".handshake"
+    command = "ls /home/kali/hs  | grep "+essid
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ssh.connect(host, port, username, password)
+    ssh.exec_command(command)
+    stdin, stdout, stderr = ssh.exec_command(command)
+    lines = stdout.readlines()
+    error = stderr.readlines()
+    return lines, error
+
+def PRINTHandshake(host: str, password: str, essid):
+    host = host
+    port = 22
+    username = "kali"
+    password = password
+    essid = essid
+    command = "cat /home/kali/Reports/"+essid+".handshake"
+    #command = "ls /home/kali/hs  | grep "+bssid
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ssh.connect(host, port, username, password)
+    ssh.exec_command(command)
+    stdin, stdout, stderr = ssh.exec_command(command)
+    lines = stdout.readlines()
+    error = stderr.readlines()
+    return lines
+
+    
+
+
 def Wifite(host: str, password: str, bssid, interface):
     host = host
     port = 22
@@ -274,7 +311,7 @@ app.layout = html.Div([
     dcc.Dropdown(id='dropdown-essid', placeholder="ESSID"),
     dcc.Dropdown(
     ['WPA/WPA2 Basic Crack', 'WPA/WPA2 Advanced', '4-full-way-Handshake'],
-    placeholder="Select Actions To RUN",
+    placeholder="Select Actions To RUN",id='drop-multi',
     multi=True
     ),
     html.Button('LoadNetworks', id = 'submitButton2', n_clicks = 0),
@@ -286,7 +323,8 @@ app.layout = html.Div([
         id='dataUpateInterval', 
         interval=5*1000, 
         n_intervals=0
-    ), dbc.Alert(id='tbl_out', className='dark-theme-control'),
+    ), dbc.Alert(id='tbl_out', className='dark-theme-control'), dcc.ConfirmDialog(
+        id='confirm-handshake')
    #html.Div([ html.Img(src=app.get_asset_url('sifi.png')), html.H3("A cup of Sifi running like a coffee!") ])
  
     
@@ -299,6 +337,25 @@ app.layout = html.Div([
    #Input('dropdown-essid', 'options'),
     #Input('pandas-dropdown-1', 'value')
 #)
+@app.callback(Output('confirm-handshake', 'displayed'),
+    Output('confirm-handshake', 'message'),[
+              Input('submitButton3', 'n_clicks'),
+              Input('dropdown-essid', 'value'),
+              Input('pandas-dropdown-1', 'value')
+              ]
+              )
+def display_confirm(callbackContext,essid,DropDownDevvalue,):
+    callbackContext = callback_context
+    button_id = callbackContext.triggered[0]['prop_id'].split('.')[0]
+    if DropDownDevvalue == "100.64.0.4":
+            passwordDev = "sifi2224"
+    else:
+            passwordDev = "kali"
+    if button_id == 'submitButton3':
+        result = Handshake(DropDownDevvalue, passwordDev, essid)
+        return True, f'Handshake Already Exists!! - Starting.... Password Basic Crack, {result}'
+    return False, "Information Security Wireless Assessment System"
+
 
     
 
@@ -335,9 +392,10 @@ def update_output(value):
          Input('submitButton2', 'n_clicks'),
          Input('submitButton3', 'n_clicks'),
           Input('dropdown-bssid', 'value'),
-        Input('dropdown-essid', 'value')]
+        Input('dropdown-essid', 'value'),
+        Input('drop-multi', 'value')]
 )
-def render_content(tab, callbackContext,DropDownDevvalue,callbackContext2,callbackContext3, bssid,essid):
+def render_content(tab, callbackContext,DropDownDevvalue,callbackContext2,callbackContext3, bssid,essid,dropmultichoise):
     # Instantiate the callback context, to find the button ID that triggered the callback
     callbackContext = callback_context
     callbackContext2 = callback_context
@@ -415,8 +473,12 @@ def render_content(tab, callbackContext,DropDownDevvalue,callbackContext2,callba
           html.H3("Selected Network Name:"+ essid, style={
                           'backgroundColor': 'rgb(30, 30, 30)',
                             'color': 'white'
-                        }),
-                    ])
+                        })])
+                        
+        
+   # if button_id3 == 'submitButton3' and dropmultichoise == '4-full-way-Handshake' and tab == 'tab-4':
+      
+
     if button_id2 == 'submitButton2':
         toSCP("100.64.0.2", "kali")     
         toSCP("100.64.0.4", "sifi2224")              
@@ -560,7 +622,7 @@ def render_content(tab, callbackContext,DropDownDevvalue,callbackContext2,callba
         ])
     elif tab == 'tab-4':
             return html.Div([ 
-                html.H4( "Here you can Discover SSID's with your SifiAgents")
+                html.H4( "Customize You WIRELESS ASSESSMENT with S.I.F.I")
                 ])        
     elif tab == 'tab-5':
        if DropDownDevvalue == "100.64.0.4":
@@ -593,6 +655,10 @@ def render_content(tab, callbackContext,DropDownDevvalue,callbackContext2,callba
                 )
 
         ])
+
+
+
+
 
 #def gotapdf(tab, callbackContext,devIDip,callbackContext2,callbackContext3, bssid,essid):
  #   callbackContext3 = callback_context
