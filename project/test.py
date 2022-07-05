@@ -35,7 +35,7 @@ def Wifite(host: str, password: str, bssid, interface):
     #command = "ls"
     bssid = bssid
     interface = interface
-    command = "screen -dmSL SIFI sudo wifite -i "+interface+" -b "+bssid+" --no-pmkid"
+    command = "screen -dmSL SIFI sudo wifite -i "+interface+" -b "+bssid+" --no-pmkid || "
     #command = "sudo besside-ng wlan0mon -b "+ bssid +" -vv"
     #command = "sudo iwlist wlan0 scan | grep ESSID"
     ssh = paramiko.SSHClient()
@@ -328,7 +328,6 @@ def update_output(value):
     
 @app.callback( 
     Output('tabs-content-inline', 'children'),
-
     [
         Input('tabs-styled-with-inline', 'value'), 
         Input('submitButton', 'n_clicks'),
@@ -389,14 +388,35 @@ def render_content(tab, callbackContext,DropDownDevvalue,callbackContext2,callba
     #               )),
                    ])
     if button_id3 == 'submitButton3':
-        pdfcreation.pdfcreator().getpdf(bssid, essid, DropDownDevvalue)
+        #pdfcreation.pdfcreator().getpdf(bssid, essid, DropDownDevvalue)
         if DropDownDevvalue == "100.64.0.4":
             passwordDev = "sifi2224"
             interface = "wlan0mon"
+            directory = "/home/ittadmin/Reports/wifi_networks/100.64.0.4/wifi_last-01.csv"
         else:
             passwordDev = "kali"
             interface = "wlan1mon"
+            directory = "/home/ittadmin/Reports/wifi_networks/100.64.0.2/wifi_last-01.csv"
         Wifite(DropDownDevvalue, passwordDev, bssid, interface)
+        dfrawifi = read_csv_sftp("100.64.0.1", "ittadmin", directory, "L1br0Sh@rkR1ng")
+        dframod = dfrawifi.loc[dfrawifi['BSSID'].isin([bssid])]
+        return html.Div([ html.H3(
+
+             dash_table.DataTable(
+                      
+                    data = dframod.to_dict('records'), style_cell={'textAlign': 'left'},     
+                        ), 
+                ),
+        
+          html.H3("Selected Network MAC:"+ bssid, style={
+                          'backgroundColor': 'rgb(30, 30, 30)',
+                            'color': 'white'
+                        }),
+          html.H3("Selected Network Name:"+ essid, style={
+                          'backgroundColor': 'rgb(30, 30, 30)',
+                            'color': 'white'
+                        }),
+                    ])
     if button_id2 == 'submitButton2':
         toSCP("100.64.0.2", "kali")     
         toSCP("100.64.0.4", "sifi2224")              
