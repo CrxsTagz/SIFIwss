@@ -1,4 +1,3 @@
-from random import random
 from fpdf import FPDF
 
 #PDF function

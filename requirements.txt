@@ -1,19 +1,9 @@
 flask  
 flask-sqlalchemy  
 flask-login
-<<<<<<< HEAD
-dash
-pandas
-mysql.connector
-pythonping
-paramiko
-dash_daq
-dash-bootstrap-components
-=======
 Dash
 numpy
 dash-daq
 pythonping
 dash-bootstrap-components
 mysql.connector
->>>>>>> origin

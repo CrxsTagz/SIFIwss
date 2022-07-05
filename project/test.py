@@ -22,10 +22,8 @@ import dash_daq as daq
 import pandas as pd
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
-<<<<<<< HEAD
-import styleClasses
-=======
 import pdfcreation
+import styleClasses
 
 def Wifite(host: str, password: str, bssid, interface):
     host = host
@@ -71,7 +69,6 @@ def toSCP(host: str, password: str):
     return lines
 
 
->>>>>>> origin
 
 # DB Connection Parameters
 dbPara = classes.dbCredentials()
@@ -128,13 +125,8 @@ def toSSH(host: str, password: str, interfaceValue: str):
     lines = stdout.readlines()
     #lines = ""
     return 
-<<<<<<< HEAD
-
-def toSSH2(host, interfaceValue):
-=======
     
 def toSSH2(host, password, interface):
->>>>>>> origin
     host = host
     port = 22
     username = "kali"
@@ -192,24 +184,12 @@ def LatencyRating():
             if check_ping(x) == True else ('0')
         )
     #Rating de la conexions de los Sifi AGENTS desde el server.
-<<<<<<< HEAD
-    if check_ping("100.64.0.2") == True and check_ping("100.64.0.4") == True and check_ping("100.64.0.77")  == True:
-        df['Rating'] = df['ip'].apply(
-            lambda x:
-            '⭐⭐⭐' if pingdef(x) < 15 else (
-                '⭐⭐' if pingdef(x) < 30 else (
-                    '⭐' if  pingdef(x) < 60  else '🔥not reliable'
-                )
-            )
-        )
-=======
     if check_ping("100.64.0.2") == True and check_ping("100.64.0.4") == True: 
         df['Rating'] = df['ip'].apply ( lambda x:
             '⭐⭐⭐' if pingdef(x) < 50 else (
             '⭐⭐' if pingdef(x) < 70 else (
             '⭐' if  pingdef(x) < 100  else '🔥not reliable'
               )))
->>>>>>> origin
 
 def SSIDDataTable():
     return html.Div([ html.H3('Sifi Agent 64.2: SSID list'),
@@ -255,38 +235,6 @@ tab_selected_style = {
     'padding': '8px'
 }
 
-<<<<<<< HEAD
-app.layout = html.Div([ 
-    dcc.Tabs(id="tabs-styled-with-inline", value='tab-1', className='dark-theme-control', children=[
-        dcc.Tab(label='Sifi Agents', value='tab-2', style=tab_style, selected_style=tab_selected_style, className='dark-theme-control'),
-        dcc.Tab(label='Pre-Run', value='tab-3', style=tab_style, selected_style=tab_selected_style, className='dark-theme-control'),
-        dcc.Tab(label='Wireless Assessment', value='tab-4', style=tab_style, selected_style=tab_selected_style, className='dark-theme-control'),
-        dcc.Tab(label='Wifi Dashboard', value='tab-5', style=tab_style, selected_style=tab_selected_style, className='dark-theme-control'),
-    ], style=tabs_styles),
-    html.Div(id='tabs-content-inline', className='dark-theme-control'),  html.Div(id='container-button-timestamp', className='dark-theme-control'),
-    dcc.Dropdown(df.ip.unique(), value='100.64.0.2', id='pandas-dropdown-1', placeholder="Select SifiAgent"),
-    dcc.Dropdown(id='dropdown-bssid', placeholder="BSSID"),
-    dcc.Dropdown(id='dropdown-essid', placeholder="ESSID"),
-    dcc.Dropdown(
-    ['WPA/WPA2 Basic Crack', 'WPA/WPA2 Advanced', '4-full-way-Handshake'],
-    placeholder="Select Actions To RUN",
-    multi=True
-    ),
-    html.Button('LoadNetworks', id = 'submitButton2', n_clicks = 0),
-    html.Button('RefreshData', id = 'submitButton', n_clicks = 0),
-    html.Div(id='pandas-output-container-1', className='dark-theme-control'),
-    html.Button('E.X.E.C.U.T.E WSS', id = 'submitButton3', n_clicks = 0),
-    html.Div(id='pandas-output-container-2'),
-    dcc.Interval(
-        id='dataUpateInterval', 
-        interval=5*1000, 
-        n_intervals=0
-    ), dbc.Alert(id='tbl_out', className='dark-theme-control'),
-   #html.Div([ html.Img(src=app.get_asset_url('sifi.png')), html.H3("A cup of Sifi running like a coffee!") ])
- 
-    
-
-=======
 #---------------------------------------FRONTEND-----------------------------------------
 app.layout = html.Div(
     [
@@ -456,20 +404,15 @@ app.layout = html.Div(
             id='tbl_out', 
             className='dark-theme-control'
         ),
-        html.Div(
-            [
-                html.Img(src=app.get_asset_url('sifi.png')), 
-                html.H3("A cup of Sifi running like a coffee!")
-            ]
-        )
+        # html.Div(
+        #     [
+        #         html.Img(src=app.get_asset_url('sifi.png')), 
+        #         html.H3("A cup of Sifi running like a coffee!")
+        #     ]
+        # )
     ]
 )
->>>>>>> 8ecfeda6389d58fe9ae923400865072d5327bab7
 
-<<<<<<< HEAD
-#---------------------------------------CALLBACKS-----------------------------------------
-=======
-])
 #@app.callback(
  #   Output('pandas-output-container-2', 'children'),
   #  Input('dropdown-bssid', 'options'),
@@ -479,30 +422,12 @@ app.layout = html.Div(
 
     
 
->>>>>>> origin
 @app.callback(
     Output('pandas-output-container-1', 'children'),
      Output('dropdown-bssid', 'options'),
     Output('dropdown-essid', 'options'),
     Input('pandas-dropdown-1', 'value')
 )
-<<<<<<< HEAD
-def update_output( value):
-    return f'You have selected {value}'
-
-# Callback to update tab2 content
-@app.callback(
-    [
-        Output('tab2DataTable1', 'value'),
-        Output('tab2DataTable1', 'columns')
-    ]
-    [
-        Input('tabs-styled-with-inline', 'value'), 
-        Input('submitButton', 'n_clicks')
-    ]
-)
-def render_content_tab2(tab, callbackContext):
-=======
 def update_output(value):
     if value == "100.64.0.4":
         passwordDev = "sifi2224"
@@ -534,17 +459,12 @@ def update_output(value):
         Input('dropdown-essid', 'value')]
 )
 def render_content(tab, callbackContext,DropDownDevvalue,callbackContext2,callbackContext3, bssid,essid):
->>>>>>> origin
     # Instantiate the callback context, to find the button ID that triggered the callback
     callbackContext = callback_context
     callbackContext2 = callback_context
     callbackContext3 = callback_context
     # Get button ID
     button_id = callbackContext.triggered[0]['prop_id'].split('.')[0]
-<<<<<<< HEAD
-    if button_id == 'submitButton' and tab == 'tab-2':
-        LatencyRating()
-=======
     button_id2 = callbackContext2.triggered[0]['prop_id'].split('.')[0]
     button_id3 = callbackContext3.triggered[0]['prop_id'].split('.')[0]
     if button_id == 'submitButton'and tab == 'tab-3':
@@ -695,7 +615,6 @@ def render_content(tab, callbackContext,DropDownDevvalue,callbackContext2,callba
         return html.Div([
             html.H3('Welcome to Sifi WSS')
         ])
->>>>>>> origin
     elif tab == 'tab-2':
         columns = [{"name": i, "id": i, 'type': "text", 'presentation':'markdown'} for i in df.columns ]
         data = df.to_dict('records')
@@ -707,7 +626,7 @@ def render_content(tab, callbackContext,DropDownDevvalue,callbackContext2,callba
         Output('tab3DataTable1', 'value'),
         Output('tab3DataTable2', 'value'),
         Output('tab3DataTable3', 'value')
-    ]
+    ],
     [
         Input('tabs-styled-with-inline', 'value'), 
         Input('submitButton', 'n_clicks')
@@ -726,114 +645,6 @@ def render_content_tab3(tab, callbackContext):
         dataTable3Value = read_csv_sftp("100.64.0.77", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "kali").to_dict('records')
         return dataTable1Value, dataTable2Value, dataTable3Value
     elif tab == 'tab-3':
-<<<<<<< HEAD
-        dataTable1Value = read_csv_sftp("100.64.0.1", "ittadmin", "/home/ittadmin/Reports/basic.wifi.csv", "L1br0Sh@rkR1ng").to_dict('records')
-        dataTable2Value = pd.DataFrame().to_dict('records')
-        dataTable3Value = pd.DataFrame().to_dict('records')
-        return dataTable1Value, dataTable2Value, dataTable3Value
-
-# Callback to update tab4 content
-@app.callback(
-    [
-        Output('drpDown2', 'options'),
-        Output('drpDown3', 'options')
-    ]
-    [
-        Input('tabs-styled-with-inline', 'value'), 
-        Input('pandas-dropdown-1', 'value')
-    ]
-)
-def render_content_tab4(tab, DropDownDevvalue):
-    if tab == 'tab-4':
-        if DropDownDevvalue == "100.64.0.4":
-            passwordDev = "sifi2224"
-        else:
-            passwordDev = "kali"
-        dfra = read_csv_sftp(DropDownDevvalue, "kali", "/home/kali/Reports/wifi_networks/wifi_last-01.csv", passwordDev)
-        dfra2 = dfra.iloc[:,0]
-        dfra3 = dfra.iloc[:,13]
-        return dfra2, dfra3
-
-# Callback to update tab5 content
-@app.callback(
-    Output('tab5DatatableData', 'value'),
-    [
-        Input('tabs-styled-with-inline', 'value'), 
-        Input('submitButton', 'n_clicks'),
-        Input('pandas-dropdown-1', 'value')
-    ]
-)
-def render_content_tab5(tab, callbackContext, DropDownDevvalue):
-    # Instantiate the callback context, to find the button ID that triggered the callback
-    callbackContext = callback_context
-    # Get button ID
-    button_id = callbackContext.triggered[0]['prop_id'].split('.')[0]
-
-    if button_id == 'submitButton' and tab == 'tab-5':
-        if DropDownDevvalue == "100.64.0.4":
-            toSSH2("100.64.0.4", "wlan0mon")
-            data = read_csv_sftp("100.64.0.4", "kali", "/home/kali/Reports/wifi_networks/wifi_last-01.csv", "sifi2224").to_dict('records')
-        elif DropDownDevvalue =="100.64.0.2":
-            toSSH2("100.64.0.2", "wlan1mon")
-            data = read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/wifi_last-01.csv", "kali").to_dict('records')      
-    elif tab == 'tab-5':
-        if DropDownDevvalue == "100.64.0.4":
-            passwordDev = "sifi2224"
-        else:
-            passwordDev = "kali"
-        data = read_csv_sftp(DropDownDevvalue, "kali", "/home/kali/Reports/wifi_networks/wifi_last-01.csv", passwordDev).to_dict('records')
-    return data
-
-# Callback to hide/display Tabbed menu content
-@app.callback(
-    [
-        Output('tab1ContentDiv', 'style'),
-        Output('tab2ContentDiv', 'style'),
-        Output('tab3ContentDiv', 'style'),
-        Output('tab4ContentDiv', 'style'),
-        Output('tab5ContentDiv', 'style')
-    ], 
-    Input('tabs-styled-with-inline', 'value')
-)
-def showTabContainer(selectedTab):
-    # Instantiate tabbed content styles
-    tab1Style = tabbedMenu_contentStyles.tabbedMenuContent
-    tab2Style = tabbedMenu_contentStyles.tabbedMenuContent
-    tab3Style = tabbedMenu_contentStyles.tabbedMenuContent
-    tab4Style = tabbedMenu_contentStyles.tabbedMenuContent
-    tab5Style = tabbedMenu_contentStyles.tabbedMenuContent
-    if selectedTab == 'tab-1':
-        tab1Style['display'] = 'inline'
-        tab2Style['display'] = 'none'
-        tab3Style['display'] = 'none'
-        tab4Style['display'] = 'none'
-        tab5Style['display'] = 'none'
-    elif selectedTab == 'tab-2':
-        tab1Style['display'] = 'none'
-        tab2Style['display'] = 'inline'
-        tab3Style['display'] = 'none'
-        tab4Style['display'] = 'none'
-        tab5Style['display'] = 'none'
-    elif selectedTab == 'tab-3':
-        tab1Style['display'] = 'none'
-        tab2Style['display'] = 'none'
-        tab3Style['display'] = 'inline'
-        tab4Style['display'] = 'none'
-        tab5Style['display'] = 'none'
-    elif selectedTab == 'tab-4':
-        tab1Style['display'] = 'none'
-        tab2Style['display'] = 'none'
-        tab3Style['display'] = 'none'
-        tab4Style['display'] = 'inline'
-        tab5Style['display'] = 'none'
-    else:
-        tab1Style['display'] = 'none'
-        tab2Style['display'] = 'none'
-        tab3Style['display'] = 'none'
-        tab4Style['display'] = 'none'
-        tab5Style['display'] = 'inline'
-    return tab1Style, tab2Style, tab3Style, tab4Style, tab5Style
-=======
          return html.Div([ html.H3('Sifi Agent 64.2: SSID list'),
                 html.H4(        
                 dash_table.DataTable(
@@ -897,7 +708,6 @@ def showTabContainer(selectedTab):
    # if button_id3 == 'submitButton3':
     #    pdfo = pdfcreation.pdfcreator()
      #   pdfo.getpdf(bssid, essid, devIDip)
->>>>>>> origin
 
 if __name__ == '__main__':
     app.run_server(debug=True, host='0.0.0.0', port='5007', dev_tools_silence_routes_logging=False)
