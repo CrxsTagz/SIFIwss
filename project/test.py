@@ -23,6 +23,7 @@ import pandas as pd
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 import pdfcreation
+from dash.exceptions import PreventUpdate
 
 def Handshake(host: str, password: str, essid):
     host = host
@@ -39,7 +40,10 @@ def Handshake(host: str, password: str, essid):
     stdin, stdout, stderr = ssh.exec_command(command)
     lines = stdout.readlines()
     error = stderr.readlines()
-    return lines, error
+    if lines:
+        a = lines[0][0:-1]
+        return a
+    
 
 def PRINTHandshake(host: str, password: str, essid):
     host = host
@@ -72,7 +76,7 @@ def Wifite(host: str, password: str, bssid, interface):
     #command = "ls"
     bssid = bssid
     interface = interface
-    command = "screen -dmSL SIFI sudo wifite -i "+interface+" -b "+bssid+" --no-pmkid || "
+    command = "screen -dmSL SIFI sudo wifite -i "+interface+" -b "+bssid+" --no-pmkid"
     #command = "sudo besside-ng wlan0mon -b "+ bssid +" -vv"
     #command = "sudo iwlist wlan0 scan | grep ESSID"
     ssh = paramiko.SSHClient()
@@ -353,7 +357,10 @@ def display_confirm(callbackContext,essid,DropDownDevvalue,):
             passwordDev = "kali"
     if button_id == 'submitButton3':
         result = Handshake(DropDownDevvalue, passwordDev, essid)
-        return True, f'Handshake Already Exists!! - Starting.... Password Basic Crack, {result}'
+        if result:
+            return True, f'Handshake Already Exists!! - Starting.... Password Basic Crack, {result}'
+        else:
+            return True, f'WPA/WPA2 4-Full-Way Handshake capture in progress...'
     return False, "Information Security Wireless Assessment System"
 
 
@@ -473,7 +480,13 @@ def render_content(tab, callbackContext,DropDownDevvalue,callbackContext2,callba
           html.H3("Selected Network Name:"+ essid, style={
                           'backgroundColor': 'rgb(30, 30, 30)',
                             'color': 'white'
-                        })])
+                        }),
+                        html.H3( Handshake(DropDownDevvalue, passwordDev, essid), style={
+                          'backgroundColor': 'rgb(30, 30, 30)',
+                            'color': 'white'
+                        }),
+                        
+                        ])
                         
         
    # if button_id3 == 'submitButton3' and dropmultichoise == '4-full-way-Handshake' and tab == 'tab-4':
