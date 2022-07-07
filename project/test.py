@@ -22,7 +22,97 @@ import dash_daq as daq
 import pandas as pd
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
+<<<<<<< HEAD
 import styleClasses
+=======
+import pdfcreation
+from dash.exceptions import PreventUpdate
+
+def Handshake(host: str, password: str, essid):
+    host = host
+    port = 22
+    username = "kali"
+    password = password
+    essid = essid
+    #command = "ls /home/kali/hs  | grep "+essid+" | > /home/kali/Reports/"+essid+".handshake"
+    command = "ls /home/kali/hs  | grep "+essid
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ssh.connect(host, port, username, password)
+    ssh.exec_command(command)
+    stdin, stdout, stderr = ssh.exec_command(command)
+    lines = stdout.readlines()
+    error = stderr.readlines()
+    if lines:
+        a = lines[0][0:-1]
+        return a
+    
+
+def PRINTHandshake(host: str, password: str, essid):
+    host = host
+    port = 22
+    username = "kali"
+    password = password
+    essid = essid
+    command = "cat /home/kali/Reports/"+essid+".handshake"
+    #command = "ls /home/kali/hs  | grep "+bssid
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ssh.connect(host, port, username, password)
+    ssh.exec_command(command)
+    stdin, stdout, stderr = ssh.exec_command(command)
+    lines = stdout.readlines()
+    error = stderr.readlines()
+    return lines
+
+    
+
+
+def Wifite(host: str, password: str, bssid, interface):
+    host = host
+    port = 22
+    username = "kali"
+    password = password
+    DATE = date.today().strftime('%Y-%m-%d-%H_%M')
+    data_wifi_csv = "wifi_net" + DATE
+    #command = "sudo timeout 20s airodump-ng wlan1mon -w /home/kali/Reports/wifi_networks/"+data_wifi_csv+" --wps --output-format csv --write-interval 5 > /home/kali/Reports/wifi_networks/wifi_last.csv"
+    #command = "ls"
+    bssid = bssid
+    interface = interface
+    command = "screen -dmSL SIFI sudo wifite -i "+interface+" -b "+bssid+" --no-pmkid"
+    #command = "sudo besside-ng wlan0mon -b "+ bssid +" -vv"
+    #command = "sudo iwlist wlan0 scan | grep ESSID"
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ssh.connect(host, port, username, password)
+    ssh.exec_command(command)
+    stdin, stdout, stderr = ssh.exec_command(command)
+    lines = stdout.readlines()
+    #lines = ""
+    return lines
+
+def toSCP(host: str, password: str):
+    host = host
+    port = 22
+    username = "kali"
+    password = password
+    DATE = date.today().strftime('%Y-%m-%d-%H_%M')
+    data_wifi_csv = "wifi_net" + DATE
+    #command = "sudo timeout 20s airodump-ng wlan1mon -w /home/kali/Reports/wifi_networks/"+data_wifi_csv+" --wps --output-format csv --write-interval 5 > /home/kali/Reports/wifi_networks/wifi_last.csv"
+    #command = "ls"
+    command = "/home/kali/scripts/scp"
+    #command = "sudo iwlist wlan0 scan | grep ESSID"
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ssh.connect(host, port, username, password)
+    ssh.exec_command(command)
+    stdin, stdout, stderr = ssh.exec_command(command)
+    lines = stdout.readlines()
+    #lines = ""
+    return lines
+
+
+>>>>>>> 2650689375dbcbea5bb241620ab27870bd5c2773
 
 # DB Connection Parameters
 dbPara = classes.dbCredentials()
@@ -191,6 +281,7 @@ tab_selected_style = {
     'padding': '8px'
 }
 
+<<<<<<< HEAD
 #---------------------------------------FRONTEND-----------------------------------------
 app.layout = html.Div(
     [
@@ -368,12 +459,78 @@ app.layout = html.Div(
         )
     ]
 )
+=======
+app.layout = html.Div([ 
+    dcc.Tabs(id="tabs-styled-with-inline", value='tab-1', className='dark-theme-control', children=[
+        dcc.Tab(label='Sifi Agents', value='tab-2', style=tab_style, selected_style=tab_selected_style, className='dark-theme-control'),
+        dcc.Tab(label='Pre-Run', value='tab-3', style=tab_style, selected_style=tab_selected_style, className='dark-theme-control'),
+        dcc.Tab(label='Wireless Assessment', value='tab-4', style=tab_style, selected_style=tab_selected_style, className='dark-theme-control'),
+        dcc.Tab(label='Wifi Dashboard', value='tab-5', style=tab_style, selected_style=tab_selected_style, className='dark-theme-control'),
+    ], style=tabs_styles),
+    html.Div(id='tabs-content-inline', className='dark-theme-control'),  html.Div(id='container-button-timestamp', className='dark-theme-control'),
+    dcc.Dropdown(df.ip.unique(), value='100.64.0.2', id='pandas-dropdown-1', placeholder="Select SifiAgent"),
+    dcc.Dropdown(id='dropdown-bssid', placeholder="BSSID"),
+    dcc.Dropdown(id='dropdown-essid', placeholder="ESSID"),
+    dcc.Dropdown(
+    ['WPA/WPA2 Basic Crack', 'WPA/WPA2 Advanced', '4-full-way-Handshake'],
+    placeholder="Select Actions To RUN",id='drop-multi',
+    multi=True
+    ),
+    html.Button('LoadNetworks', id = 'submitButton2', n_clicks = 0),
+    html.Button('RefreshData', id = 'submitButton', n_clicks = 0),
+    html.Div(id='pandas-output-container-1', className='dark-theme-control'),
+    html.Button('E.X.E.C.U.T.E WSS', id = 'submitButton3', n_clicks = 0),
+    html.Div(id='pandas-output-container-2'),
+    dcc.Interval(
+        id='dataUpateInterval', 
+        interval=5*1000, 
+        n_intervals=0
+    ), dbc.Alert(id='tbl_out', className='dark-theme-control'), dcc.ConfirmDialog(
+        id='confirm-handshake')
+   #html.Div([ html.Img(src=app.get_asset_url('sifi.png')), html.H3("A cup of Sifi running like a coffee!") ])
+ 
+    
+
+
+])
+#@app.callback(
+ #   Output('pandas-output-container-2', 'children'),
+  #  Input('dropdown-bssid', 'options'),
+   #Input('dropdown-essid', 'options'),
+    #Input('pandas-dropdown-1', 'value')
+#)
+@app.callback(Output('confirm-handshake', 'displayed'),
+    Output('confirm-handshake', 'message'),[
+              Input('submitButton3', 'n_clicks'),
+              Input('dropdown-essid', 'value'),
+              Input('pandas-dropdown-1', 'value')
+              ]
+              )
+def display_confirm(callbackContext,essid,DropDownDevvalue,):
+    callbackContext = callback_context
+    button_id = callbackContext.triggered[0]['prop_id'].split('.')[0]
+    if DropDownDevvalue == "100.64.0.4":
+            passwordDev = "sifi2224"
+    else:
+            passwordDev = "kali"
+    if button_id == 'submitButton3':
+        result = Handshake(DropDownDevvalue, passwordDev, essid)
+        if result:
+            return True, f'Handshake Already Exists!! - Starting.... Password Basic Crack, {result}'
+        else:
+            return True, f'WPA/WPA2 4-Full-Way Handshake capture in progress...'
+    return False, "Information Security Wireless Assessment System"
+
+
+    
+>>>>>>> 2650689375dbcbea5bb241620ab27870bd5c2773
 
 #---------------------------------------CALLBACKS-----------------------------------------
 @app.callback(
     Output('pandas-output-container-1', 'children'),
     Input('pandas-dropdown-1', 'value')
 )
+<<<<<<< HEAD
 def update_output( value):
     return f'You have selected {value}'
 
@@ -389,6 +546,39 @@ def update_output( value):
     ]
 )
 def render_content_tab2(tab, callbackContext):
+=======
+def update_output(value):
+    if value == "100.64.0.4":
+        passwordDev = "sifi2224"
+        directory = "/home/ittadmin/Reports/wifi_networks/100.64.0.4/wifi_last-01.csv"
+
+          
+    else:
+        passwordDev = "kali"
+        directory = "/home/ittadmin/Reports/wifi_networks/100.64.0.2/wifi_last-01.csv"
+    
+    dfra = read_csv_sftp("100.64.0.1", "ittadmin", directory, "L1br0Sh@rkR1ng")
+    #dfra=[{"name": "BSSID", "id": i, } for i in dfra.columns ],
+    dfra4 = dfra.iloc[:, 0]
+    dfra5 = dfra.iloc[:, 13]
+    ko = f'You have selected {value}'
+    return ko, dfra4, dfra5 
+    
+    
+@app.callback( 
+    Output('tabs-content-inline', 'children'),
+    [
+        Input('tabs-styled-with-inline', 'value'), 
+        Input('submitButton', 'n_clicks'),
+         Input('pandas-dropdown-1', 'value'),
+         Input('submitButton2', 'n_clicks'),
+         Input('submitButton3', 'n_clicks'),
+          Input('dropdown-bssid', 'value'),
+        Input('dropdown-essid', 'value'),
+        Input('drop-multi', 'value')]
+)
+def render_content(tab, callbackContext,DropDownDevvalue,callbackContext2,callbackContext3, bssid,essid,dropmultichoise):
+>>>>>>> 2650689375dbcbea5bb241620ab27870bd5c2773
     # Instantiate the callback context, to find the button ID that triggered the callback
     callbackContext = callback_context
     # Get button ID
@@ -430,6 +620,7 @@ def render_content_tab3(tab, callbackContext):
         dataTable3Value = pd.DataFrame().to_dict('records')
         return dataTable1Value, dataTable2Value, dataTable3Value
 
+<<<<<<< HEAD
 # Callback to update tab4 content
 @app.callback(
     [
@@ -451,6 +642,147 @@ def render_content_tab4(tab, DropDownDevvalue):
         dfra2 = dfra.iloc[:,0]
         dfra3 = dfra.iloc[:,13]
         return dfra2, dfra3
+=======
+                        #columns=[{"name": i, "id": i, 'type': "text", 'presentation':'markdown'} for i in  read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "kali").columns ],
+                       # columns=[{"name": [["weburl"]], "id": "weburl", 'type': "", 'presentation':'markdown'}],
+   #               data = read_csv_sftp("100.64.0.77", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "kali").to_dict('records'), style_cell={'textAlign': 'left'},     
+                       
+    #               )),
+                   ])
+    if button_id3 == 'submitButton3':
+        #pdfcreation.pdfcreator().getpdf(bssid, essid, DropDownDevvalue)
+        if DropDownDevvalue == "100.64.0.4":
+            passwordDev = "sifi2224"
+            interface = "wlan0mon"
+            directory = "/home/ittadmin/Reports/wifi_networks/100.64.0.4/wifi_last-01.csv"
+        else:
+            passwordDev = "kali"
+            interface = "wlan1mon"
+            directory = "/home/ittadmin/Reports/wifi_networks/100.64.0.2/wifi_last-01.csv"
+        Wifite(DropDownDevvalue, passwordDev, bssid, interface)
+        dfrawifi = read_csv_sftp("100.64.0.1", "ittadmin", directory, "L1br0Sh@rkR1ng")
+        dframod = dfrawifi.loc[dfrawifi['BSSID'].isin([bssid])]
+        return html.Div([ html.H3(
+
+             dash_table.DataTable(
+                      
+                    data = dframod.to_dict('records'), style_cell={'textAlign': 'left'},     
+                        ), 
+                ),
+        
+          html.H3("Selected Network MAC:"+ bssid, style={
+                          'backgroundColor': 'rgb(30, 30, 30)',
+                            'color': 'white'
+                        }),
+          html.H3("Selected Network Name:"+ essid, style={
+                          'backgroundColor': 'rgb(30, 30, 30)',
+                            'color': 'white'
+                        }),
+                        html.H3( Handshake(DropDownDevvalue, passwordDev, essid), style={
+                          'backgroundColor': 'rgb(30, 30, 30)',
+                            'color': 'white'
+                        }),
+                        
+                        ])
+                        
+        
+   # if button_id3 == 'submitButton3' and dropmultichoise == '4-full-way-Handshake' and tab == 'tab-4':
+      
+
+    if button_id2 == 'submitButton2':
+        toSCP("100.64.0.2", "kali")     
+        toSCP("100.64.0.4", "sifi2224")              
+    if button_id == 'submitButton' and tab == 'tab-2':
+         LatencyRating()
+    if button_id == 'submitButton' and tab == 'tab-5':
+         if check_ping("100.64.0.2") == True and check_ping("100.64.0.4") == True:
+            toSSH2("100.64.0.2", "kali", "wlan1mon")
+            toSSH2("100.64.0.4", "sifi2224", "wlan0mon")
+            toSCP("100.64.0.2", "kali", "wlan1mon")     
+            toSCP("100.64.0.4", "sifi2224", "wlan0mon") 
+
+
+            if DropDownDevvalue == "100.64.0.4":
+              #  passwordDev = "sifi2224"
+                    directory = "/home/ittadmin/Reports/wifi_networks/100.64.0.4/wifi_last-01.csv"
+      #      toSSH2(DropDownDevvalue,passwordDev, "wlan0mon")
+            
+            else:
+         #   passwordDev = "kali"
+                    directory = "/home/ittadmin/Reports/wifi_networks/100.64.0.2/wifi_last-01.csv"
+       #     toSSH2(DropDownDevvalue,passwordDev, "wlan0mon")
+            return html.Div([
+          # html.H3(toSSH2)
+                    html.H4(        
+                    dash_table.DataTable(
+                        #columns = [{'name': i, 'id': i} ],
+
+                        #columns=[{"name": i, "id": i, 'type': "text", 'presentation':'markdown'} for i in  read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "kali").columns ],
+                       # columns=[{"name": [["weburl"]], "id": "weburl", 'type': "", 'presentation':'markdown'}],
+                    data = read_csv_sftp("100.64.0.1", "ittadmin", directory,"L1br0Sh@rkR1ng").to_dict('records'), style_cell={'textAlign': 'left'},
+                        style_header={
+                          'backgroundColor': 'rgb(30, 30, 30)',
+                            'color': 'white'
+                        },
+                        style_data={
+                            'backgroundColor': 'rgb(50, 50, 50)',
+                            'color': 'white'
+                        }          
+                            )
+                )
+       
+                ])
+   # if button_id == 'submitButton' and tab == 'tab-5':
+    #    if DropDownDevvalue == "10.64.0.4":
+     #       toSSH2("100.64.0.4", "wlan0mon")
+      #      return html.Div([
+          # html.H3(toSSH2)
+       #     html.H4(        
+        #        dash_table.DataTable(
+                        #columns = [{'name': i, 'id': i} ],
+
+                        #columns=[{"name": i, "id": i, 'type': "text", 'presentation':'markdown'} for i in  read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "kali").columns ],
+                       # columns=[{"name": [["weburl"]], "id": "weburl", 'type': "", 'presentation':'markdown'}],
+                            
+         #                       data = read_csv_sftp("100.64.0.4", "kali", "/home/kali/Reports/wifi_networks/wifi_last-01.csv", "sifi2224").to_dict('records'), style_cell={'textAlign': 'left'},
+          #              style_header={
+           #               'backgroundColor': 'rgb(30, 30, 30)',
+            #                'color': 'green'
+             #           },
+              #          style_data={
+               #             'backgroundColor': '#00d1b2',
+                #            'color': 'green'
+                 #       }          
+                  #          )
+                #)
+
+                 #   ])
+       # elif DropDownDevvalue =="100.64.0.2":
+        #    toSSH2("100.64.0.2", "wlan1mon")
+         #   return html.Div([
+          # html.H3(toSSH2)
+          #  html.H4(        
+           #     dash_table.DataTable(
+                        #columns = [{'name': i, 'id': i} ],
+
+                        #columns=[{"name": i, "id": i, 'type': "text", 'presentation':'markdown'} for i in  read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "kali").columns ],
+                       # columns=[{"name": [["weburl"]], "id": "weburl", 'type': "", 'presentation':'markdown'}],
+                            
+            #                    data = read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/wifi_last-01.csv", "kali").to_dict('records'), style_cell={'textAlign': 'left'},
+             #           style_header={
+              #            'backgroundColor': 'rgb(30, 30, 30)',
+               #             'color': 'green'
+                #        },
+                 #      style_data={
+                  #          'backgroundColor': 'rgb(50, 50, 50)',
+                   #         'color': 'green'
+                    #    }          
+                     #       )
+                #)
+
+                 #   ])
+        
+>>>>>>> 2650689375dbcbea5bb241620ab27870bd5c2773
 
 # Callback to update tab5 content
 @app.callback(
@@ -467,6 +799,7 @@ def render_content_tab5(tab, callbackContext, DropDownDevvalue):
     # Get button ID
     button_id = callbackContext.triggered[0]['prop_id'].split('.')[0]
 
+<<<<<<< HEAD
     if button_id == 'submitButton' and tab == 'tab-5':
         if DropDownDevvalue == "100.64.0.4":
             toSSH2("100.64.0.4", "wlan0mon")
@@ -474,6 +807,18 @@ def render_content_tab5(tab, callbackContext, DropDownDevvalue):
         elif DropDownDevvalue =="100.64.0.2":
             toSSH2("100.64.0.2", "wlan1mon")
             data = read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/wifi_last-01.csv", "kali").to_dict('records')      
+=======
+                        #columns=[{"name": i, "id": i, 'type': "text", 'presentation':'markdown'} for i in  read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "kali").columns ],
+                       # columns=[{"name": [["weburl"]], "id": "weburl", 'type': "", 'presentation':'markdown'}],
+                    data = read_csv_sftp("100.64.0.1", "ittadmin", "/home/ittadmin/Reports/wifi_networks/100.64.0.4/basic.wifi.csv", "L1br0Sh@rkR1ng").to_dict('records'), style_cell={'textAlign': 'left'},     
+                        ), 
+                ), 
+        ])
+    elif tab == 'tab-4':
+            return html.Div([ 
+                html.H4( "Customize You WIRELESS ASSESSMENT with S.I.F.I")
+                ])        
+>>>>>>> 2650689375dbcbea5bb241620ab27870bd5c2773
     elif tab == 'tab-5':
         if DropDownDevvalue == "100.64.0.4":
             passwordDev = "sifi2224"
@@ -482,6 +827,7 @@ def render_content_tab5(tab, callbackContext, DropDownDevvalue):
         data = read_csv_sftp(DropDownDevvalue, "kali", "/home/kali/Reports/wifi_networks/wifi_last-01.csv", passwordDev).to_dict('records')
     return data
 
+<<<<<<< HEAD
 # Callback to hide/display Tabbed menu content
 @app.callback(
     [
@@ -531,6 +877,19 @@ def showTabContainer(selectedTab):
         tab4Style['display'] = 'none'
         tab5Style['display'] = 'inline'
     return tab1Style, tab2Style, tab3Style, tab4Style, tab5Style
+=======
+
+
+
+
+#def gotapdf(tab, callbackContext,devIDip,callbackContext2,callbackContext3, bssid,essid):
+ #   callbackContext3 = callback_context
+    # Get button ID
+  #  button_id3 = callbackContext3.triggered[0]['prop_id'].split('.')[0]
+   # if button_id3 == 'submitButton3':
+    #    pdfo = pdfcreation.pdfcreator()
+     #   pdfo.getpdf(bssid, essid, devIDip)
+>>>>>>> 2650689375dbcbea5bb241620ab27870bd5c2773
 
 if __name__ == '__main__':
     app.run_server(debug=True, host='0.0.0.0', port='5007', dev_tools_silence_routes_logging=False)
