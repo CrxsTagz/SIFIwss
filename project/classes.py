@@ -2,5 +2,5 @@
 class dbCredentials():
     dbUsername = 'root'
     dbPassword = 'sifi'
-    dbServerIp = 'localhost'
+    dbServerIp = '100.64.0.1'
     dataTable = 'sifi'
