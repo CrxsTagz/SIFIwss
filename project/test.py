@@ -24,6 +24,8 @@ import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 import pdfcreation
 from dash.exceptions import PreventUpdate
+import json
+from pandas import json_normalize
 
 def AdvancedCrack(host: str, password: str, handshake, email):
     host = host
@@ -33,7 +35,7 @@ def AdvancedCrack(host: str, password: str, handshake, email):
     handshake = handshake
     email = email
     #command = "ls /home/kali/hs  | grep "+essid+" | > /home/kali/Reports/"+essid+".handshake"
-    command = "wlancap2wpasec -u https://api.onlinehashcrack.com  -e "+email+" /home/kali/hs/"+handshake
+    command = "sudo wlancap2wpasec -u https://api.onlinehashcrack.com  -e "+email+" /home/kali/hs/"+handshake
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     ssh.connect(host, port, username, password)
@@ -42,16 +44,6 @@ def AdvancedCrack(host: str, password: str, handshake, email):
     lines = stdout.readlines()
     error = stderr.readlines()    
     return lines
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -171,6 +163,30 @@ def read_csv_sftp(hostname: str, username: str, remotepath: str, password: str, 
     sftp.close()
     client.close()
     return dataframe
+
+def read_json_sftp(hostname: str, username: str, remotepath: str, password: str, *args, **kwargs) -> pd.DataFrame:
+
+    # open an SSH connection
+    client = paramiko.SSHClient()
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    client.connect(hostname, username=username, password=password)
+    #command = "sudo cat /home/kali/cracked.json"
+    #client.exec_command(command)
+    # read the file using SFTP
+    sftp = client.open_sftp()
+    remote_file = sftp.open(remotepath)
+    data = pd.read_json(remote_file, *args, **kwargs)
+    
+    # close the connections
+    
+    # Use pandas.DataFrame.from_dict() to Convert JSON to DataFrame
+  #  df2 = pd.read_json(data, orient ='index')
+  # df2 = pd.DataFrame.from_dict(data, orient="index")
+    sftp.close()
+    client.close()
+    remote_file.close()
+    return data
+ 
 
 
 
@@ -339,6 +355,7 @@ app.layout = html.Div([
         dcc.Tab(label='Pre-Run', value='tab-3', style=tab_style, selected_style=tab_selected_style, className='dark-theme-control'),
         dcc.Tab(label='Wireless Assessment', value='tab-4', style=tab_style, selected_style=tab_selected_style, className='dark-theme-control'),
         dcc.Tab(label='Wifi Dashboard', value='tab-5', style=tab_style, selected_style=tab_selected_style, className='dark-theme-control'),
+         dcc.Tab(label='WSS Results', value='tab-6', style=tab_style, selected_style=tab_selected_style, className='dark-theme-control')
     ], style=tabs_styles),
     html.Div(id='tabs-content-inline', className='dark-theme-control'),  html.Div(id='container-button-timestamp', className='dark-theme-control'),
     dcc.Dropdown(df.ip.unique(), value='100.64.0.2', id='pandas-dropdown-1', placeholder="Select SifiAgent"),
@@ -523,6 +540,7 @@ def render_content(tab, callbackContext,DropDownDevvalue,callbackContext2,callba
              advancedCrackOutput = AdvancedCrack(DropDownDevvalue, passwordDev, handshake, email_input)
         dfrawifi = read_csv_sftp("100.64.0.1", "ittadmin", directory, "L1br0Sh@rkR1ng")
         dframod = dfrawifi.loc[dfrawifi['BSSID'].isin([bssid])]
+        
         return html.Div([ html.H3(
 
              dash_table.DataTable(
@@ -732,8 +750,25 @@ def render_content(tab, callbackContext,DropDownDevvalue,callbackContext2,callba
                 )
 
         ])
+    elif tab == "tab-6":
+        return html.Div([ html.H4(        
+                    dash_table.DataTable(
+                        #columns = [{'name': i, 'id': i} ],
 
-
+                        #columns=[{"name": i, "id": i, 'type': "text", 'presentation':'markdown'} for i in  read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "kali").columns ],
+                       # columns=[{"name": [["weburl"]], "id": "weburl", 'type': "", 'presentation':'markdown'}],
+                    data = read_json_sftp("100.64.0.2", "kali", "/home/kali/cracked.json","kali").to_dict('records'), style_cell={'textAlign': 'left'},
+                        style_header={
+                          'backgroundColor': 'rgb(30, 30, 30)',
+                            'color': 'green'
+                        },
+                        style_data={
+                            'backgroundColor': 'rgb(50, 50, 50)',
+                            'color': 'white'
+                        }          
+                            )
+                )
+        ])
 
 
 
