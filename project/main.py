@@ -29,21 +29,22 @@ def json():
 
 @main.route('/getpdf')
 def getpdf():
-    wpascore = random()
-    fwfhs = random()
-    #save FPDF class into a variable pdf
-    pdf = FPDF()
+    PDF_creation.pdfGenerator('PUCMM')
+    #wpascore = random()
+    #fwfhs = random()
+    ##save FPDF class into a variable pdf
+    #pdf = FPDF()
 
-#Add page
-    pdf.add_page()
+    ##Add page
+    #pdf.add_page()
 
-    pdf.set_font("Arial", size= 13)
+    #pdf.set_font("Arial", size= 13)
 
-#create cells 
+    ##create cells 
 
-    pdf.cell(200, 10,  txt= f"Tu score en wpa es: {wpascore}", ln= 1, align= 'L')
-    pdf.cell(200, 10,  txt= f"Tu score en wpa es: {fwfhs}", ln= 2, align= 'L')
+    #pdf.cell(200, 10,  txt= f"Tu score en wpa es: {wpascore}", ln= 1, align= 'L')
+    #pdf.cell(200, 10,  txt= f"Tu score en wpa es: {fwfhs}", ln= 2, align= 'L')
 
-#save the pdf with the .pdf extension
+    ##save the pdf with the .pdf extension
 
-    pdf.output("Prueba.pdf")
+    #pdf.output("Prueba.pdf")
