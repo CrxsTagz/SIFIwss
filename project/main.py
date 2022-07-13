@@ -3,7 +3,6 @@
 from flask import Blueprint, render_template
 from flask_login import login_required, current_user
 from random import random
-from fpdf import FPDF
 import PDF_creation
 
 main = Blueprint('main', __name__)

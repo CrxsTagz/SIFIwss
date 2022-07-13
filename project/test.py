@@ -22,7 +22,6 @@ import dash_daq as daq
 import pandas as pd
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
-import pdfcreation
 from dash.exceptions import PreventUpdate
 
 def Handshake(host: str, password: str, essid):
