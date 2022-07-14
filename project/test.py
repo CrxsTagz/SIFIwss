@@ -28,6 +28,32 @@ import json
 from pandas import json_normalize
 from pdfreport import pdfGenerator
 
+
+def WifiteOnlyHANDSHAKEnocrack(host: str, password: str, bssid, interface):
+    host = host
+    port = 22
+    username = "kali"
+    password = password
+    DATE = date.today().strftime('%Y-%m-%d-%H_%M')
+    data_wifi_csv = "wifi_net" + DATE
+    #command = "sudo timeout 20s airodump-ng wlan1mon -w /home/kali/Reports/wifi_networks/"+data_wifi_csv+" --wps --output-format csv --write-interval 5 > /home/kali/Reports/wifi_networks/wifi_last.csv"
+    #command = "ls"
+    bssid = bssid
+    interface = interface
+    command = "screen -dmSL SIFI sudo wifite -i "+interface+" -b "+bssid+" --no-pmkid --no-wps --skip-crack"
+    #command = "sudo besside-ng wlan0mon -b "+ bssid +" -vv"
+    #command = "sudo iwlist wlan0 scan | grep ESSID"
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ssh.connect(host, port, username, password)
+    ssh.exec_command(command)
+    stdin, stdout, stderr = ssh.exec_command(command)
+    lines = stdout.readlines()
+    #lines = ""
+    return lines
+
+
+
 def AdvancedCrack(host: str, password: str, handshake, email):
     host = host
     port = 22
@@ -44,10 +70,10 @@ def AdvancedCrack(host: str, password: str, handshake, email):
     stdin, stdout, stderr = ssh.exec_command(command)
     lines = stdout.readlines()
     error = stderr.readlines()    
-    return lines
-
-
-
+    if lines:
+        return lines
+    else:
+        return ""
 
 def Handshake(host: str, password: str, essid):
     host = host
@@ -71,6 +97,8 @@ def Handshake(host: str, password: str, essid):
     if lines:
         a = lines[0][0:-1]
         return a
+    else:
+        return ""
     
 
 def PRINTHandshake(host: str, password: str, essid):
@@ -113,8 +141,6 @@ def WifiteNoWPS(host: str, password: str, bssid, interface):
     #lines = ""
     return lines
 
-
-    
 
 
 def Wifite(host: str, password: str, bssid, interface):
@@ -345,9 +371,9 @@ def LatencyRating():
     #Rating de la conexions de los Sifi AGENTS desde el server.
     if check_ping("100.64.0.2") == True and check_ping("100.64.0.4") == True: 
         df['Rating'] = df['ip'].apply ( lambda x:
-            '⭐⭐⭐' if pingdef(x) < 50 else (
-            '⭐⭐' if pingdef(x) < 70 else (
-            '⭐' if  pingdef(x) < 100  else '🔥not reliable'
+            '⭐⭐⭐' if pingdef(x) <= 50 else (
+            '⭐⭐' if pingdef(x) <=100 else (
+            '⭐' if  pingdef(x) <=150  else '🔥not reliable'
               )))
 
 def SSIDDataTable():
@@ -594,15 +620,18 @@ def render_content(tab, callbackContext,DropDownDevvalue,callbackContext2,callba
             interface = "wlan1mon"
             directory = "/home/ittadmin/Reports/wifi_networks/100.64.0.2/wifi_last-01.csv"
         handshake = Handshake(DropDownDevvalue, passwordDev, essid)
-        if dropmultichoise == ['WPA/WPA2 Basic Crack', 'WPA/WPA2 Advanced'] or dropmultichoise == ['WPA/WPA2 Advanced']:
+        if dropmultichoise == ['WPA/WPA2 Basic Crack', 'WPA/WPA2 Advanced'] or dropmultichoise == ['WPA/WPA2 Advanced'] or dropmultichoise ==  ['WPA/WPA2 Advanced' , 'WPA/WPA2 Basic Crack']:
              Wifite(DropDownDevvalue, passwordDev, bssid, interface)
              WifitePMKID(DropDownDevvalue, passwordDev, bssid, interface)
              advancedCrackOutput = AdvancedCrack(DropDownDevvalue, passwordDev, handshake, email_input)
              if not advancedCrackOutput:
                 advancedCrackOutput = "Advanced Mode Not Selected = Basic WPA/WPA2 Crack"
-        else:
-            advancedCrackOutput = "Advanced Mode Not Selected = Basic WPA/WPA2 Crack"
-            WifiteNoWPS(DropDownDevvalue, passwordDev, bssid, interface)
+        elif dropmultichoise == ['WPA/WPA2 Basic Crack', '4-full-way-Handshake'] or dropmultichoise == ['WPA/WPA2 Basic Crack']:
+           advancedCrackOutput = "Advanced Mode Not Selected = Basic WPA/WPA2 Crack after handshake capture"
+           WifiteNoWPS(DropDownDevvalue, passwordDev, bssid, interface)
+        elif dropmultichoise == ['4-full-way-Handshake'] :
+           advancedCrackOutput = "Advanced Mode Not Selected = Only 4-full way handshake will be captured"
+           WifiteOnlyHANDSHAKEnocrack(DropDownDevvalue, passwordDev, bssid, interface)
         dfrawifi = read_csv_sftp("100.64.0.1", "ittadmin", directory, "L1br0Sh@rkR1ng")
         dframod = dfrawifi.loc[dfrawifi['BSSID'].isin([bssid])]
         
@@ -649,15 +678,16 @@ def render_content(tab, callbackContext,DropDownDevvalue,callbackContext2,callba
     if button_id == 'submitButton' and tab == 'tab-2':
          LatencyRating()
     if button_id == 'submitButton' and tab == 'tab-5':
-        if check_ping("100.64.0.2") == True: 
-            toSSH2("100.64.0.2", "kali", "wlan1mon")
-            toSCP("100.64.0.2", "kali") 
-        if check_ping("100.64.0.4") == True:
-            toSSH2("100.64.0.4", "sifi2224", "wlan0mon")
-            toSCP("100.64.0.4", "sifi2224")
         if check_ping("100.64.0.77") == True:
             toSSH2("100.64.0.77", "kali", "wlan1mon")
-            toSCP("100.64.0.77", "kali") 
+          #  toSCP("100.64.0.77", "kali")
+        if check_ping("100.64.0.2") == True: 
+            toSSH2("100.64.0.2", "kali", "wlan1mon")
+            #toSCP("100.64.0.2", "kali") 
+        if check_ping("100.64.0.4") == True:
+            toSSH2("100.64.0.4", "sifi2224", "wlan0mon")
+           # toSCP("100.64.0.4", "sifi2224")
+         
 
 
             if DropDownDevvalue == "100.64.0.4":
