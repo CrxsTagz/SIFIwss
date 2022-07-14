@@ -844,7 +844,7 @@ def render_content(tab, callbackContext,DropDownDevvalue,callbackContext2,callba
 
                         #columns=[{"name": i, "id": i, 'type': "text", 'presentation':'markdown'} for i in  read_csv_sftp("100.64.0.2", "kali", "/home/kali/Reports/wifi_networks/basic.wifi.csv", "kali").columns ],
                        # columns=[{"name": [["weburl"]], "id": "weburl", 'type': "", 'presentation':'markdown'}],
-                    data = read_json_sftp("100.64.0.77", "kali", "/home/kali/cracked.json","kali").to_dict('records'), style_cell={'textAlign': 'left'},
+                    data = read_json_sftp("100.64.0.1", "ittadmin", "/home/ittadmin/Reports/sifi-cracked/cracked.json","L1br0Sh@rkR1ng").to_dict('records'), style_cell={'textAlign': 'left'},
                         style_header={
                           'backgroundColor': 'rgb(30, 30, 30)',
                             'color': 'green'

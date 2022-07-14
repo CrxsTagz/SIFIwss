@@ -23,7 +23,7 @@ def pdfGenerator(customerName):
 
     # add format
     # logo
-    pdf.image("./sifi-icon.jpg", 0, 0, 20)
+    pdf.image("sifi-icon.jpg", 0, 0, 20)
     # font arial bold 15pts
     pdf.set_font('Arial', 'B', 15)
     # move to the right
@@ -89,7 +89,7 @@ def pdfGenerator(customerName):
 
     #add format
     #logo
-        pdf.image("./cwsp_c.png", 0, 0, 20)
+        pdf.image("cwsp_c.png", 0, 0, 20)
         pdf.set_font("Arial", size= 16)
         # pdf.ln(10)
 
@@ -169,4 +169,4 @@ def pdfGenerator(customerName):
         # pdf.cell(200, 10, txt= "No se ha capturado el handshake", ln= 11, align= 'L')
 
     #save the pdf with the .pdf extension
-    pdf.output("SiFi_{}_{}_{}.pdf".format(Assesment_ID, customerName, date))
+    pdf.output("PDFReports/SiFi_{}_{}_{}.pdf".format(Assesment_ID, customerName, date))
