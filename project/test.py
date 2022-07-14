@@ -26,6 +26,7 @@ import pdfcreation
 from dash.exceptions import PreventUpdate
 import json
 from pandas import json_normalize
+from pdfreport import pdfGenerator
 
 def AdvancedCrack(host: str, password: str, handshake, email):
     host = host
@@ -836,6 +837,7 @@ def render_content(tab, callbackContext,DropDownDevvalue,callbackContext2,callba
 
         ])
     elif tab == "tab-6":
+        pdfGenerator("PUCMM")
         return html.Div([ html.H4(        
                     dash_table.DataTable(
                         #columns = [{'name': i, 'id': i} ],
